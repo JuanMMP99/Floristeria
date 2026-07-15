@@ -2,7 +2,7 @@
 const CONFIG = {
   business: {
     name: "Ortiz Floristería",
-    phone: "529514990142", // Tu número real de WhatsApp
+    phone: "9514990142", // Tu número real de WhatsApp
     address: "Centro Histórico, Oaxaca, México",
     schedule: "Lunes a Sábado: 9:00 AM - 8:00 PM",
     socials: {
@@ -31,7 +31,8 @@ const CONFIG = {
     title: "Flores para todos los momentos de la vida",
     subtitle: "Floristas locales trabajando con amor y dedicación",
     ctaText: "Comprar Ahora",
-    image: "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=1920&q=80"
+    // Imagen de portada actualizada con tu selección:
+    image: "https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=600&q=80"
   },
 
   inAHurry: {
