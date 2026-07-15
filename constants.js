@@ -94,7 +94,7 @@ const CONFIG = {
       name: "Orquídea Premium Doble",
       price: 1500,
       description: "Elegante orquídea de doble tallo en base de cerámica fina para interiores.",
-      image: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=600&q=80"
+      image: "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=600&q=80"
     }
   ],
 
