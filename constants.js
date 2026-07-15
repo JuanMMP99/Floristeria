@@ -6,8 +6,8 @@ const CONFIG = {
     address: "Centro Histórico, Oaxaca, México",
     schedule: "Lunes a Sábado: 9:00 AM - 8:00 PM",
     socials: {
-      facebook: "https://facebook.com/ortiz_floristeria",
-      instagram: "https://instagram.com/ortiz_floristeria",
+      facebook: "https://facebook.com/floristeria",
+      instagram: "https://instagram.com/floristeria",
       linkedin: "#",
       youtube: "#"
     }
