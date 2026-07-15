@@ -1,7 +1,7 @@
 // constants.js
 const CONFIG = {
   business: {
-    name: "Ortiz Floristería",
+    name: "Floristería",
     phone: "9514990142", // Tu número real de WhatsApp
     address: "Centro Histórico, Oaxaca, México",
     schedule: "Lunes a Sábado: 9:00 AM - 8:00 PM",
