@@ -1,221 +1,646 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Floristería | Flores para momentos de la vida</title>
-  <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <!-- Google Fonts: Playfair Display & Plus Jakarta Sans -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-
-  <!-- ==================== WIDGET FLOTANTE DE WHATSAPP ==================== -->
-  <div class="whatsapp-widget-container" id="wa-widget">
-    <!-- Globo emergente interactivo -->
-    <div class="wa-popup shadow" id="wa-popup">
-      <div class="wa-popup-header d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-2">
-          <div class="wa-avatar">O</div>
-          <div>
-            <h6 class="m-0 fw-bold">Floristería</h6>
-            <span class="wa-status">Normalmente responde de inmediato</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Florería Natura | Arreglos Florales en Oaxaca</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Great+Vibes&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Widget de WhatsApp Flotante -->
+    <div class="whatsapp-widget-container" id="wa-widget">
+      <div class="wa-popup shadow" id="wa-popup">
+        <div
+          class="wa-popup-header d-flex justify-content-between align-items-center"
+        >
+          <div class="d-flex align-items-center gap-2">
+            <div class="wa-avatar">N</div>
+            <div>
+              <h6 class="m-0 fw-bold">Florería Natura</h6>
+              <small class="opacity-75">Responde en pocos minutos</small>
+            </div>
+          </div>
+          <button
+            class="btn-close btn-close-white btn-sm"
+            id="close-popup"
+            aria-label="Cerrar"
+          ></button>
+        </div>
+        <div class="wa-popup-body">
+          <div class="wa-bubble">
+            <p class="m-0">
+              ¡Hola! 🌸 ¿Te gustaría consultar disponibilidad de entregas para
+              hoy en Oaxaca?
+            </p>
           </div>
         </div>
-        <button class="btn-close btn-close-white btn-sm" id="close-popup" aria-label="Cerrar"></button>
-      </div>
-      <div class="wa-popup-body">
-        <div class="wa-bubble received">
-          <p class="m-0">¡Hola! 👋 ¿Buscas un diseño especial o flores de temporada para hoy?</p>
-        </div>
-      </div>
-      <div class="wa-popup-footer p-3 bg-white">
-        <a href="#" class="btn btn-success w-100 fw-bold d-flex align-items-center justify-content-center gap-2 py-2" id="wa-widget-btn" target="_blank">
-          <i class="bi bi-whatsapp"></i> Iniciar Chat
-        </a>
-      </div>
-    </div>
-
-    <!-- Botón Principal Redondo / Deslizable -->
-    <button class="whatsapp-btn shadow" id="wa-main-trigger" aria-label="Contacto de WhatsApp">
-      <i class="bi bi-whatsapp"></i>
-      <span class="btn-text">Escríbenos</span>
-    </button>
-  </div>
-  <!-- ===================================================================== -->
-
-  <!-- Barra de Aviso Superior -->
-  <div class="top-bar-alert text-center py-2 px-3 small" id="top-alert">
-    Cargando aviso...
-  </div>
-
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg sticky-top bg-white py-3">
-    <div class="container">
-      <a class="navbar-brand fw-bold text-brand" href="#" id="brand-logo">Cargando...</a>
-      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="mainNav">
-        <ul class="navbar-nav mx-auto mb-2 mb-lg-0" id="navbar-links">
-          <!-- Dinámico -->
-        </ul>
-        <a href="#" class="btn btn-brand btn-sm text-uppercase fw-semibold px-4 py-2" id="nav-cta">Cargando...</a>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Hero Section -->
-  <header class="hero-section text-center d-flex align-items-center" id="hero-bg">
-    <div class="container py-5">
-      <div class="hero-card mx-auto p-4 p-md-5">
-        <h1 class="hero-title mb-3" id="hero-title">Cargando...</h1>
-        <p class="hero-subtitle mb-4 text-muted" id="hero-subtitle">Cargando...</p>
-        <a href="#" class="btn btn-brand text-uppercase fw-semibold px-4 py-2.5" id="hero-cta">Cargando...</a>
-      </div>
-    </div>
-  </header>
-
-  <!-- In a Hurry Section -->
-  <section class="in-a-hurry-section py-5 text-center">
-    <div class="container py-3">
-      <h2 class="section-title text-uppercase mb-2" id="hurry-title">Cargando...</h2>
-      <p class="text-muted max-w-600 mx-auto mb-4" id="hurry-text">Cargando...</p>
-      <a href="#" class="btn btn-brand text-uppercase fw-semibold px-4 py-2" id="hurry-cta">Cargando...</a>
-    </div>
-  </section>
-
-  <!-- Catálogo de Productos -->
-  <section id="productos" class="py-5 bg-white">
-    <div class="container py-4">
-      <div class="text-center mb-5">
-        <h2 class="section-title fw-bold">Diseños de Temporada</h2>
-        <p class="text-muted mt-2">Haz clic en tu favorito para ordenar directamente por WhatsApp</p>
-      </div>
-      <div class="row g-4 justify-content-center" id="products-container">
-        <!-- Renderizado dinámico de productos -->
-      </div>
-    </div>
-  </section>
-
-  <!-- Diseño Especial / Personalizado -->
-  <section id="diseno-especial" class="py-5 bg-light-gray">
-    <div class="container py-4">
-      <div class="row align-items-center g-5">
-        <div class="col-lg-6">
-          <img src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80" alt="Arreglos personalizados" class="img-fluid rounded shadow-sm border">
-        </div>
-        <div class="col-lg-6">
-          <h2 class="section-title mb-3" id="custom-title">Cargando...</h2>
-          <p class="text-muted mb-4 lead" id="custom-subtitle"></p>
-          <ul class="list-unstyled mb-4" id="custom-options-list">
-            <!-- Dinámico -->
-          </ul>
-          <a href="#" id="custom-cta" class="btn btn-brand text-uppercase fw-semibold px-4 py-3" target="_blank">Cargando...</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- How It Works Section -->
-  <section id="como-funciona" class="py-5 bg-white position-relative overflow-hidden">
-    <div class="leaf-decor left"></div>
-    <div class="container py-4 position-relative z-1">
-      <div class="text-center mb-5">
-        <h2 class="section-title fw-bold" id="how-title">Cargando...</h2>
-        <p class="text-muted mt-2" id="how-subtitle">Cargando...</p>
-      </div>
-      <div class="row g-4 justify-content-center mb-5" id="steps-container">
-        <!-- Tarjetas dinámicas -->
-      </div>
-      <div class="text-center">
-        <a href="#" class="btn btn-brand text-uppercase fw-semibold px-5 py-3" id="how-cta">Cargando...</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Middle CTA Split Section -->
-  <section id="ideas" class="py-5 bg-white">
-    <div class="container">
-      <div class="row align-items-center g-0 border-rounded shadow-sm overflow-hidden bg-light-gray">
-        <div class="col-md-6 p-4 p-md-5">
-          <div class="p-md-3">
-            <h2 class="split-title mb-4" id="mid-title">Cargando...</h2>
-            <p class="text-muted mb-4 lead" id="mid-text">Cargando...</p>
-            <a href="#" class="btn btn-brand text-uppercase fw-semibold px-4 py-2.5" id="mid-cta-btn">Cargando...</a>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="split-image-container" id="mid-img"></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ Section -->
-  <section id="faq" class="py-5 bg-light-gray">
-    <div class="container py-5">
-      <div class="text-center mb-5">
-        <h2 class="section-title fw-bold">Frequently Asked Questions</h2>
-        <p class="text-muted">Compra localmente de forma rápida y segura.</p>
-      </div>
-      <div class="row g-4" id="faq-container">
-        <!-- FAQs dinámicas -->
-      </div>
-    </div>
-  </section>
-
-  <!-- Visual Break Section -->
-  <div class="visual-break-flowers"></div>
-
-  <!-- SECCIÓN REEMPLAZADA: Llamada directa a Contacto de WhatsApp (Sin Correo) -->
-  <section class="py-5 bg-white text-center" id="canal-whatsapp-sec">
-    <div class="container py-4">
-      <h3 class="section-title mb-2" id="promo-title">Cargando...</h3>
-      <p class="text-muted mb-4" id="promo-subtitle">Cargando...</p>
-      <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-          <a href="#" class="btn btn-brand text-uppercase fw-semibold px-5 py-3 w-100 shadow-sm" id="promo-cta">
-            Cargando...
+        <div class="wa-popup-footer p-3 bg-white">
+          <a
+            href="#"
+            class="btn btn-brand w-100 fw-bold d-flex align-items-center justify-content-center gap-2 py-2"
+            id="wa-widget-btn"
+            target="_blank"
+          >
+            <i class="bi bi-whatsapp"></i> Chatear por WhatsApp
           </a>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- Footer -->
-  <footer class="bg-white pt-5 pb-4 border-top">
-    <div class="container">
-      <div class="row g-4 align-items-center justify-content-between">
-        <div class="col-md-3 text-center text-md-start">
-          <span class="footer-logo fw-bold text-brand" id="footer-logo">Cargando...</span>
+      <button class="whatsapp-btn shadow" id="wa-main-trigger">
+        <i class="bi bi-whatsapp fs-5"></i>
+        <span class="btn-text">¿Dudas? Escríbenos</span>
+      </button>
+    </div>
+
+    <!-- Top Alert -->
+    <div class="top-bar-alert text-center py-2 px-3 fw-medium">
+      🌸 ¡Puntos Natura! Acumula 1 punto por cada $100 MXN de compra.
+    </div>
+
+    <!-- Navbar con Botón de Carrito -->
+    <nav
+      class="navbar navbar-expand-lg sticky-top bg-white py-3 border-bottom shadow-sm"
+    >
+      <div class="container">
+        <a class="navbar-brand fw-bold text-brand" href="index.html"
+          >Florería Natura</a
+        >
+
+        <div class="d-flex align-items-center gap-2 order-lg-last">
+          <!-- BOTÓN CARRITO -->
+          <button
+            class="btn btn-outline-brand position-relative rounded-circle p-2 d-flex align-items-center justify-content-center"
+            style="width: 42px; height: 42px"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#cartOffcanvas"
+          >
+            <i class="bi bi-bag-heart-fill fs-5"></i>
+            <span
+              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+              id="cart-badge"
+            >
+              0
+            </span>
+          </button>
+
+          <button
+            class="navbar-toggler border-0"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mainNav"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
         </div>
-        <div class="col-md-6 text-center">
-          <div class="footer-nav d-flex flex-wrap justify-content-center gap-4" id="footer-links">
-            <!-- Dinámico -->
+
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a
+                class="nav-link px-3 active text-brand fw-semibold"
+                href="index.html"
+                >Inicio</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="productos.html"
+                >Catálogo Completo</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="#puntos-natura">Puntos Natura</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="#ubicacion">Ubicación</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- HERO SECTION MINIMALISTA & PASTEL -->
+    <header class="hero-clean-section position-relative py-5 overflow-hidden">
+      <div class="container py-lg-4">
+        <div class="row align-items-center g-5">
+          <!-- Lado Izquierdo: Contenido -->
+          <div class="col-lg-6 text-center text-lg-start">
+            <div class="hero-clean-content">
+              <span
+                class="hero-subtitle text-uppercase tracking-widest text-brand-muted fw-semibold d-block mb-2"
+              >
+                Florería Natura · Oaxaca
+              </span>
+
+              <h1 class="hero-title text-uppercase fw-bold text-dark my-3">
+                Haz que tu boda <br class="d-none d-sm-inline" />se llene de
+                <br />
+                <span class="text-brand">Belleza y Elegancia</span>
+              </h1>
+
+              <p class="hero-description text-secondary my-4">
+                Arreglos florales exclusivos y de alta gama, diseñados con
+                flores frescas para crear atmósferas inolvidables en tus
+                momentos más especiales.
+              </p>
+
+              <div
+                class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start pt-2"
+              >
+                <a
+                  href="productos.html"
+                  class="btn btn-soft-pink btn-lg px-4 py-3 fw-medium rounded-pill shadow-sm"
+                >
+                  Explorar Colección
+                </a>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="col-md-3 text-center text-md-end">
-          <div class="social-icons" id="footer-socials">
-            <!-- Dinámico -->
+
+          <!-- Lado Derecho: Composición de Imagen Flotante -->
+          <div class="col-lg-6">
+            <div class="hero-visual-wrapper position-relative text-center">
+              <!-- Fondo Suave Flotante estilo Mancha/Acuarela o Círculo sutil -->
+              <div class="hero-bg-blob"></div>
+
+              <!-- Imagen de Ramo Orgánico -->
+              <img
+                src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80"
+                alt="Arreglo Floral Elegante"
+                class="img-fluid hero-main-img position-relative z-1"
+              />
+            </div>
           </div>
         </div>
       </div>
-      <hr class="my-4 text-muted opacity-25">
-      <div class="text-center text-muted small">
-        &copy; <span id="year"></span> <span id="copyright-name"></span>. Todos los derechos reservados.
+    </header>
+
+    <!-- SECCIÓN DESTACADOS -->
+    <section class="py-5 bg-white">
+      <div class="container py-4">
+        <div class="text-center mb-5">
+          <h2 class="section-title fw-bold font-serif">
+            Diseños Destacados de Temporada
+          </h2>
+          <p class="text-muted mt-2">
+            Selección especial para bodas, eventos y momentos inolvidables
+          </p>
+        </div>
+
+        <div
+          class="row g-4 justify-content-center mb-5"
+          id="featured-products-container"
+        >
+          <!-- Render dinámico desde app.js -->
+        </div>
+
+        <div class="text-center">
+          <a
+            href="productos.html"
+            class="btn btn-brand btn-lg text-uppercase fw-semibold px-5 py-3 shadow-sm"
+          >
+            Ver Catálogo Completo <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN PUNTOS NATURA -->
+    <section
+      id="puntos-natura"
+      class="py-5 bg-light-pink border-top border-bottom"
+    >
+      <div class="container py-4">
+        <div class="row align-items-center g-5">
+          <div class="col-lg-5 text-center">
+            <div
+              class="points-card-image rounded shadow-lg overflow-hidden position-relative"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=800&q=80"
+                alt="Orquídea Puntos Natura"
+                class="img-fluid"
+              />
+              <div class="points-badge">Programa de Beneficios</div>
+            </div>
+          </div>
+          <div class="col-lg-7">
+            <span class="text-uppercase tracking-wider text-brand fw-bold small"
+              >PROGRAMA DE BENEFICIOS</span
+            >
+            <h2 class="display-5 font-serif fw-normal mt-1 mb-4">
+              Cada compra te da <em class="text-brand">puntos</em>
+            </h2>
+
+            <div class="points-formula-box mb-4 p-4 rounded bg-white border">
+              <div class="row text-center align-items-center g-3">
+                <div class="col-md-5">
+                  <span class="fs-5 text-muted">$100 MXN en tu compra =</span>
+                </div>
+                <div class="col-md-7">
+                  <span class="fs-4 fw-bold text-brand font-serif"
+                    >1 Punto Natura</span
+                  >
+                </div>
+              </div>
+              <hr class="my-3 opacity-25" />
+              <div class="row text-center align-items-center g-3">
+                <div class="col-md-5">
+                  <span class="fs-5 text-muted">1 Punto Natura =</span>
+                </div>
+                <div class="col-md-7">
+                  <span class="fs-3 fw-bold text-brand font-serif"
+                    >$1 MXN para comprar</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="example-box bg-white p-3.5 rounded border-start border-4 border-pink mb-4"
+            >
+              <p class="mb-1 text-dark small">
+                <strong>Ejemplo:</strong> Si hoy haces una compra de
+                <strong>$1,000 MXN</strong>, acumulas
+                <strong>10 Puntos Natura</strong> para tu próxima compra.
+              </p>
+              <p class="mb-0 text-muted small">
+                Eso significa que en tu siguiente compra podrás descontar
+                <strong>$10 MXN</strong> al total de tu pedido, porque cada
+                Punto Natura es igual a un peso mexicano.
+              </p>
+            </div>
+
+            <div
+              class="alert bg-brand-pink text-white m-0 p-3 rounded-3 text-center fw-medium"
+            >
+              <i class="bi bi-clock-history me-2"></i> Tus Puntos Natura son
+              acumulables y vencen cada año calendario.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN UBICACIÓN -->
+    <section id="ubicacion" class="py-5 bg-white">
+      <div class="container py-4">
+        <div class="text-center mb-5">
+          <h2 class="section-title fw-bold font-serif">
+            Visítanos en Nuestra Tienda
+          </h2>
+          <p class="text-muted">
+            Estamos ubicados en la Col. Reforma, Oaxaca de Juárez
+          </p>
+        </div>
+
+        <div class="row g-4 align-items-center">
+          <div class="col-lg-7">
+            <div
+              class="map-frame-wrapper shadow-sm rounded-4 overflow-hidden border"
+            >
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7627.975418536648!2d-96.71321830954406!3d17.073253875705028!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85c722320e258fe1%3A0x97541b2e039a6cb3!2sFlorer%C3%ADa%20Natura!5e0!3m2!1ses-419!2smx!4v1786468837109!5m2!1ses-419!2smx"
+                width="100%"
+                height="420"
+                style="border: 0"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="strict-origin-when-cross-origin"
+              ></iframe>
+            </div>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="card p-4 border-0 bg-light-pink shadow-sm rounded-4">
+              <h4 class="fw-bold mb-4 text-dark font-serif border-bottom pb-3">
+                Información de Sucursal
+              </h4>
+
+              <div class="d-flex align-items-start gap-3 mb-4">
+                <div
+                  class="icon-square bg-white text-brand p-3 rounded-circle shadow-sm"
+                >
+                  <i class="bi bi-geo-alt-fill fs-4"></i>
+                </div>
+                <div>
+                  <h6 class="fw-bold m-0">Dirección Exacta</h6>
+                  <p class="text-muted small m-0 mt-1">
+                    Almendros 600, esq. Manuel Ruiz (Edificio Núñez Banuet),
+                    Col. Reforma, 68050 Oaxaca de Juárez, Oax.
+                  </p>
+                </div>
+              </div>
+
+              <div class="d-flex align-items-start gap-3 mb-4">
+                <div
+                  class="icon-square bg-white text-brand p-3 rounded-circle shadow-sm"
+                >
+                  <i class="bi bi-clock-fill fs-4"></i>
+                </div>
+                <div>
+                  <h6 class="fw-bold m-0">Horarios de Atención</h6>
+                  <p class="text-muted small m-0 mt-1">
+                    <strong>Lunes a Sábado:</strong> 8:00 AM – 10:30 PM<br />
+                    <strong>Domingo:</strong> 9:00 AM – 5:00 PM
+                  </p>
+                </div>
+              </div>
+
+              <div class="d-flex align-items-start gap-3">
+                <div
+                  class="icon-square bg-white text-brand p-3 rounded-circle shadow-sm"
+                >
+                  <i class="bi bi-telephone-fill fs-4"></i>
+                </div>
+                <div>
+                  <h6 class="fw-bold m-0">Atención Directa</h6>
+                  <p class="text-muted small m-0 mt-1">
+                    +52 951 128 4003 (WhatsApp & Llamadas)
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OFFCANVAS CARRITO DE COMPRAS -->
+    <div
+      class="offcanvas offcanvas-end"
+      tabindex="-1"
+      id="cartOffcanvas"
+      aria-labelledby="cartOffcanvasLabel"
+    >
+      <div class="offcanvas-header border-bottom bg-light-pink">
+        <h5
+          class="offcanvas-title fw-bold text-dark d-flex align-items-center gap-2"
+          id="cartOffcanvasLabel"
+        >
+          <i class="bi bi-bag-heart text-brand"></i> Mi Carrito de Compras
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div
+        class="offcanvas-body d-flex flex-column justify-content-between p-0"
+      >
+        <!-- Lista de Ítems -->
+        <div
+          class="cart-items-wrapper p-3 overflow-y-auto"
+          id="cart-items-container"
+        >
+          <!-- Render dinámico desde JS -->
+        </div>
+
+        <!-- Resumen y Checkout -->
+        <div class="cart-footer p-3 bg-white border-top shadow-lg">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small">Puntos Natura a ganar:</span>
+            <span class="fw-bold text-brand" id="cart-points-earned"
+              >+0 Puntos</span
+            >
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="fw-bold text-dark fs-5">Total Subtotal:</span>
+            <span class="fw-bold text-brand fs-4" id="cart-total-price"
+              >$0 MXN</span
+            >
+          </div>
+
+          <div class="d-grid gap-2">
+            <button
+              class="btn btn-brand py-3 text-uppercase fw-bold"
+              id="btn-proceed-checkout"
+              onclick="openCheckoutModal()"
+            >
+              Finalizar Pedido <i class="bi bi-arrow-right ms-2"></i>
+            </button>
+            <button
+              class="btn btn-link text-muted btn-sm text-decoration-none"
+              onclick="clearCart()"
+            >
+              Vaciar Carrito
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </footer>
 
-  <!-- Scripts -->
-  <script src="constants.js"></script>
-  <script src="app.js"></script>
-  <!-- Bootstrap 5 JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+    <!-- MODAL CHECKOUT COMPLETO (Del Carrito al WhatsApp) -->
+    <div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-light-pink">
+            <h5 class="modal-title fw-bold text-brand">
+              Confirmar y Programar Entrega
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <form id="orderForm">
+              <!-- Resumen de productos elegidos -->
+              <div
+                class="p-3 mb-4 rounded bg-light-pink border border-pink"
+                id="checkout-summary-box"
+              >
+                <span class="text-muted small fw-semibold"
+                  >Resumen de tu pedido:</span
+                >
+                <ul class="list-unstyled my-2 small" id="checkout-items-list">
+                  <!-- Se llena dinámicamente -->
+                </ul>
+                <div
+                  class="d-flex justify-content-between align-items-center border-top pt-2"
+                >
+                  <span class="fw-bold text-dark">Total:</span>
+                  <span
+                    class="text-brand fw-bold fs-5"
+                    id="checkout-total-price"
+                    >$0 MXN</span
+                  >
+                </div>
+              </div>
+
+              <h6 class="fw-bold mb-3 border-bottom pb-2">
+                1. Datos del Comprador
+              </h6>
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label">Tu Nombre Completo *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="buyerName"
+                    required
+                    placeholder="Ej. Juan Pérez"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Tu Teléfono / WhatsApp *</label>
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="buyerPhone"
+                    required
+                    placeholder="Ej. 951 123 4567"
+                  />
+                </div>
+              </div>
+
+              <h6 class="fw-bold mb-3 border-bottom pb-2">
+                2. Modalidad y Pago
+              </h6>
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label">¿Cómo deseas recibirlo? *</label>
+                  <select
+                    class="form-select"
+                    id="deliveryType"
+                    required
+                    onchange="toggleDeliveryFields()"
+                  >
+                    <option value="envio">Envío a Domicilio</option>
+                    <option value="tienda">
+                      Recoger en Tienda (Col. Reforma)
+                    </option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Método de Pago *</label>
+                  <select class="form-select" id="paymentMethod" required>
+                    <option value="Transferencia Bancaria">
+                      Transferencia Bancaria
+                    </option>
+                    <option value="Efectivo">Pago en Efectivo</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="deliveryFieldsSection">
+                <h6 class="fw-bold mb-3 border-bottom pb-2">
+                  3. Dirección de Entrega
+                </h6>
+                <div class="row g-3 mb-4">
+                  <div class="col-md-6">
+                    <label class="form-label">Nombre de quien recibe *</label>
+                    <input
+                      type="text"
+                      class="form-control delivery-req"
+                      id="recipientName"
+                      placeholder="Ej. Ana Gómez"
+                    />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label"
+                      >Teléfono del destinatario *</label
+                    >
+                    <input
+                      type="tel"
+                      class="form-control delivery-req"
+                      id="recipientPhone"
+                      placeholder="Ej. 951 987 6543"
+                    />
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label">Dirección Completa *</label>
+                    <input
+                      type="text"
+                      class="form-control delivery-req"
+                      id="address"
+                      placeholder="Calle, número exterior/interior, colonia"
+                    />
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label">Referencias del Domicilio</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="addressRef"
+                      placeholder="Color de fachada, entre qué calles, etc."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <h6 class="fw-bold mb-3 border-bottom pb-2">
+                4. Programación y Dedicatoria
+              </h6>
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Fecha de Entrega *</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="deliveryDate"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Hora Aproximada *</label>
+                  <input
+                    type="time"
+                    class="form-control"
+                    id="deliveryTime"
+                    required
+                  />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Mensaje para la Tarjeta</label>
+                  <textarea
+                    class="form-control"
+                    id="cardMessage"
+                    rows="3"
+                    placeholder="Escribe aquí tu dedicatoria..."
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="d-grid gap-2 mt-4">
+                <button
+                  type="submit"
+                  class="btn btn-brand py-3 text-uppercase fw-bold"
+                >
+                  Enviar Pedido por WhatsApp <i class="bi bi-whatsapp ms-2"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="bg-white pt-5 pb-4 border-top">
+      <div class="container text-center text-muted small">
+        &copy; 2026 Florería Natura. Almendros 600, Col. Reforma, Oaxaca.
+      </div>
+    </footer>
+
+    <script src="catalog.js"></script>
+    <script src="constants.js"></script>
+    <script src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
 </html>

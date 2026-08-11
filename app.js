@@ -1,198 +1,148 @@
-// app.js
+// Estado del Carrito respaldado en LocalStorage
+let cart = JSON.parse(localStorage.getItem('natura_cart')) || [];
+let orderModalObj = null;
+
 document.addEventListener("DOMContentLoaded", () => {
-  renderNavbar();
-  renderHero();
-  renderHurrySection();
-  renderProducts();
-  renderCustomBouquet();
-  renderHowItWorks();
-  renderSplitSection();
-  renderFAQs();
-  renderWhatsAppPromo(); // Renderizado de la nueva sección de invitación
-  renderFooter();
-  setupWhatsAppWidget(); // Inicialización del widget tipo SleekFlow
+  const modalElem = document.getElementById('orderModal');
+  if (modalElem) {
+    orderModalObj = new bootstrap.Modal(modalElem);
+  }
+
+  // Renderizar Vistas
+  if (document.getElementById("featured-products-container")) renderFeaturedProducts();
+  if (document.getElementById("catalog-container")) applyFilters();
+
+  updateCartUI();
+  setupWhatsAppWidget();
+  setupFormHandler();
 });
 
-// Generar enlace dinámico
-function getWhatsAppUrl(customMessage = "") {
-  const baseText = customMessage || `Hola ${CONFIG.business.name}, me gustaría solicitar información de sus diseños florales.`;
-  return `https://wa.me/${CONFIG.business.phone}?text=${encodeURIComponent(baseText)}`;
+// FUNCIONES DEL CARRITO
+function addToCart(productId) {
+  const product = CATALOG.find(p => p.id === productId);
+  if (!product) return;
+
+  const existing = cart.find(item => item.id === productId);
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    cart.push({ ...product, quantity: 1 });
+  }
+
+  saveCart();
+  updateCartUI();
+
+  // Abrir Offcanvas automáticox
+  const cartOffcanvas = new bootstrap.Offcanvas(document.getElementById('cartOffcanvas'));
+  cartOffcanvas.show();
 }
 
-// 1. WIDGET INTERACTIVO DE WHATSAPP (Tipo SleekFlow)
-function setupWhatsAppWidget() {
-  const widgetTrigger = document.getElementById("wa-main-trigger");
-  const waPopup = document.getElementById("wa-popup");
-  const closePopup = document.getElementById("close-popup");
-  const waWidgetBtn = document.getElementById("wa-widget-btn");
+function updateQuantity(productId, delta) {
+  const item = cart.find(i => i.id === productId);
+  if (!item) return;
 
-  // Al dar clic al disparador flotante abre/cierra la ventana
-  widgetTrigger.addEventListener("click", (e) => {
-    e.stopPropagation();
-    waPopup.classList.toggle("show");
-  });
+  item.quantity += delta;
+  if (item.quantity <= 0) {
+    cart = cart.filter(i => i.id !== productId);
+  }
 
-  // Botón cerrar popup
-  closePopup.addEventListener("click", (e) => {
-    e.stopPropagation();
-    waPopup.classList.remove("show");
-  });
-
-  // Evitar que se cierre al hacer clic adentro de la ventanita
-  waPopup.addEventListener("click", (e) => {
-    e.stopPropagation();
-  });
-
-  // Cerrar si se da clic en cualquier parte fuera de la ventanita
-  document.addEventListener("click", () => {
-    waPopup.classList.remove("show");
-  });
-
-  // Configurar enlace del botón final "Iniciar Chat" del widget
-  waWidgetBtn.href = getWhatsAppUrl("Hola, vi el asistente en su página web y me gustaría hacer una consulta de flores.");
-
-  // APARICIÓN AUTOMÁTICA DESPUÉS DE 5 SEGUNDOS (Excelente para captar atención en frío)
-  setTimeout(() => {
-    // Solo se abre si el usuario no la ha cerrado previamente de forma manual
-    if (!waPopup.classList.contains("show")) {
-      waPopup.classList.add("show");
-    }
-  }, 5000);
+  saveCart();
+  updateCartUI();
 }
 
-// 2. Navbar y TopAlert
-function renderNavbar() {
-  document.getElementById("top-alert").innerText = CONFIG.topAlert.text;
-  document.getElementById("brand-logo").innerText = CONFIG.business.name;
-  
-  const navContainer = document.getElementById("navbar-links");
-  navContainer.innerHTML = CONFIG.navbar.links.map(link => `
-    <li class="nav-item">
-      <a class="nav-link px-3" href="${link.url}">${link.name}</a>
-    </li>
-  `).join('');
-
-  const navCta = document.getElementById("nav-cta");
-  navCta.innerText = CONFIG.navbar.ctaText;
-  navCta.href = getWhatsAppUrl(`Hola ${CONFIG.business.name}, me gustaría enviar flores. ¿Qué opciones tienen hoy?`);
+function removeFromCart(productId) {
+  cart = cart.filter(i => i.id !== productId);
+  saveCart();
+  updateCartUI();
 }
 
-// 3. Hero Section
-function renderHero() {
-  document.getElementById("hero-title").innerText = CONFIG.hero.title;
-  document.getElementById("hero-subtitle").innerText = CONFIG.hero.subtitle;
-  
-  const heroCta = document.getElementById("hero-cta");
-  heroCta.innerText = CONFIG.hero.ctaText;
-  heroCta.href = getWhatsAppUrl(`Hola ${CONFIG.business.name}, vi su sitio web y quiero realizar un pedido de flores.`);
-  document.getElementById("hero-bg").style.backgroundImage = `linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('${CONFIG.hero.image}')`;
+function clearCart() {
+  cart = [];
+  saveCart();
+  updateCartUI();
 }
 
-// 4. In a Hurry Section
-function renderHurrySection() {
-  document.getElementById("hurry-title").innerText = CONFIG.inAHurry.title;
-  document.getElementById("hurry-text").innerText = CONFIG.inAHurry.text;
-  
-  const hurryCta = document.getElementById("hurry-cta");
-  hurryCta.innerText = CONFIG.inAHurry.ctaText;
-  hurryCta.href = getWhatsAppUrl(`Hola ${CONFIG.business.name}, ¡tengo prisa! Necesito enviar un arreglo express hoy mismo.`);
+function saveCart() {
+  localStorage.setItem('natura_cart', JSON.stringify(cart));
 }
 
-// 5. Catálogo de Productos
-function renderProducts() {
-  const container = document.getElementById("products-container");
-  container.innerHTML = CONFIG.products.map(product => {
-    const textMessage = `Hola ${CONFIG.business.name}, me interesa comprar el diseño de temporada: *${product.name}* (Precio: $${product.price} MXN). ¿Me podrían confirmar disponibilidad de entrega?`;
-    const productWaUrl = getWhatsAppUrl(textMessage);
+function updateCartUI() {
+  const container = document.getElementById("cart-items-container");
+  const badge = document.getElementById("cart-badge");
+  const totalDisplay = document.getElementById("cart-total-price");
+  const pointsDisplay = document.getElementById("cart-points-earned");
+  const checkoutBtn = document.getElementById("btn-proceed-checkout");
 
-    return `
-      <div class="col-md-6 col-lg-3">
-        <div class="card h-100 product-card d-flex flex-column justify-content-between">
-          <img src="${product.image}" class="card-img-top" alt="${product.name}">
-          <div class="card-body d-flex flex-column justify-content-between p-4">
-            <div>
-              <h5 class="fw-bold text-dark mb-2">${product.name}</h5>
-              <p class="text-muted small mb-3">${product.description}</p>
-            </div>
-            <div>
-              <p class="product-price text-brand mb-3">$${product.price} MXN</p>
-              <a href="${productWaUrl}" target="_blank" class="btn btn-brand w-100 py-2.5 text-uppercase fw-semibold">
-                Pedir por WhatsApp
-              </a>
-            </div>
-          </div>
-        </div>
+  // Conteo total
+  const totalCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+  if (badge) badge.innerText = totalCount;
+
+  // Total en MXN
+  const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  if (totalDisplay) totalDisplay.innerText = `$${subtotal.toLocaleString()} MXN`;
+
+  // Puntos calculados ($100 MXN = 1 Punto)
+  const points = Math.floor(subtotal / 100);
+  if (pointsDisplay) pointsDisplay.innerText = `+${points} Puntos Natura`;
+
+  if (checkoutBtn) {
+    checkoutBtn.disabled = cart.length === 0;
+  }
+
+  if (!container) return;
+
+  if (cart.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-bag-x display-3 mb-2 d-block opacity-50"></i>
+        <p class="mb-0">Tu carrito está vacío</p>
+        <small>Agrega arreglos florales para comenzar</small>
       </div>
     `;
-  }).join('');
-}
+    return;
+  }
 
-// 6. Diseño Especial / Personalizado
-function renderCustomBouquet() {
-  document.getElementById("custom-title").innerText = CONFIG.customBouquet.title;
-  document.getElementById("custom-subtitle").innerText = CONFIG.customBouquet.subtitle;
-  
-  const listContainer = document.getElementById("custom-options-list");
-  listContainer.innerHTML = CONFIG.customBouquet.options.map(option => `
-    <li class="mb-3 text-muted">
-      <i class="bi bi-check-lg text-brand me-2 fs-5"></i> ${option}
-    </li>
-  `).join('');
-
-  const customCta = document.getElementById("custom-cta");
-  customCta.innerText = CONFIG.customBouquet.ctaText;
-  customCta.href = getWhatsAppUrl(`Hola ${CONFIG.business.name}, quiero cotizar un diseño floral personalizado a mi medida y presupuesto.`);
-}
-
-// 7. How It Works Section
-function renderHowItWorks() {
-  document.getElementById("how-title").innerText = CONFIG.howItWorks.title;
-  document.getElementById("how-subtitle").innerText = CONFIG.howItWorks.subtitle;
-  
-  const container = document.getElementById("steps-container");
-  container.innerHTML = CONFIG.howItWorks.steps.map(step => `
-    <div class="col-md-4">
-      <div class="how-card text-center d-flex flex-column align-items-center">
-        <div class="mb-4">
-          <i class="bi ${step.icon}"></i>
+  container.innerHTML = cart.map(item => `
+    <div class="cart-item-card d-flex align-items-center justify-content-between gap-3">
+      <img src="${item.image}" class="cart-item-img" alt="${item.name}">
+      <div class="flex-grow-1">
+        <h6 class="fw-bold mb-0 text-dark small">${item.name}</h6>
+        <span class="text-brand fw-bold small">$${item.price} MXN</span>
+        <div class="d-flex align-items-center gap-2 mt-1">
+          <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="updateQuantity('${item.id}', -1)">-</button>
+          <span class="small fw-bold">${item.quantity}</span>
+          <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="updateQuantity('${item.id}', 1)">+</button>
         </div>
-        <h4 class="fw-bold fs-5 mb-3">${step.title}</h4>
-        <p class="text-muted small mb-4">${step.description}</p>
-        <div class="card-number">${step.number}</div>
       </div>
+      <button class="btn btn-link text-danger p-0 border-0" onclick="removeFromCart('${item.id}')">
+        <i class="bi bi-trash fs-5"></i>
+      </button>
     </div>
   `).join('');
-
-  const howCta = document.getElementById("how-cta");
-  howCta.innerText = CONFIG.howItWorks.ctaText;
-  howCta.href = getWhatsAppUrl(`Hola ${CONFIG.business.name}, leí cómo funciona el pedido en su sitio y quiero comenzar mi orden.`);
 }
 
-// 8. Middle CTA Split Section
-function renderSplitSection() {
-  document.getElementById("mid-title").innerText = CONFIG.midCta.title;
-  document.getElementById("mid-text").innerText = CONFIG.midCta.text;
-  
-  const midCtaBtn = document.getElementById("mid-cta-btn");
-  midCtaBtn.innerText = CONFIG.midCta.ctaText;
-  midCtaBtn.href = getWhatsAppUrl(`Hola ${CONFIG.business.name}, quiero celebrar un momento especial con un arreglo único.`);
+// RENDER DE PRODUCTOS CON BOTÓN AGREGAR AL CARRITO
+function renderFeaturedProducts() {
+  const container = document.getElementById("featured-products-container");
+  if (!container) return;
 
-  document.getElementById("mid-img").style.backgroundImage = `url('${CONFIG.midCta.image}')`;
-}
+  const featured = CATALOG.slice(0, 4);
 
-// 9. Frequently Asked Questions
-function renderFAQs() {
-  const container = document.getElementById("faq-container");
-  container.innerHTML = CONFIG.faqs.map((faq, index) => `
-    <div class="col-md-6">
-      <div class="faq-item-card d-flex flex-column justify-content-between">
-        <div>
-          <h4 class="faq-question d-flex justify-content-between align-items-center text-brand" data-bs-toggle="collapse" data-bs-target="#answer-${index}">
-            <span>${faq.question}</span>
-            <i class="bi bi-chevron-down fs-6 text-muted"></i>
-          </h4>
-          <div id="answer-${index}" class="collapse ${index === 0 ? 'show' : ''} mt-3">
-            <p class="faq-answer text-muted mb-0">${faq.answer}</p>
+  container.innerHTML = featured.map(product => `
+    <div class="col-md-6 col-lg-3">
+      <div class="card h-100 product-card d-flex flex-column justify-content-between">
+        <img src="${product.image}" class="card-img-top" alt="${product.name}">
+        <div class="card-body d-flex flex-column justify-content-between p-3">
+          <div>
+            <span class="badge bg-light text-brand border border-pink mb-2">${product.category}</span>
+            <h5 class="fw-bold text-dark mb-1 fs-6">${product.name}</h5>
+            <p class="text-muted small mb-2 text-truncate">${product.description}</p>
+          </div>
+          <div>
+            <p class="fs-5 fw-bold text-brand font-serif mb-2">$${product.price} MXN</p>
+            <button onclick="addToCart('${product.id}')" class="btn btn-brand w-100 py-2 text-uppercase fw-semibold btn-sm">
+              <i class="bi bi-cart-plus me-1"></i> Agregar al Carrito
+            </button>
           </div>
         </div>
       </div>
@@ -200,32 +150,106 @@ function renderFAQs() {
   `).join('');
 }
 
-// 10. NUEVA SECCIÓN: Promoción de Catálogo de WhatsApp (En reemplazo de la newsletter)
-function renderWhatsAppPromo() {
-  document.getElementById("promo-title").innerText = CONFIG.whatsappPromo.title;
-  document.getElementById("promo-subtitle").innerText = CONFIG.whatsappPromo.subtitle;
-  
-  const promoCta = document.getElementById("promo-cta");
-  promoCta.innerText = CONFIG.whatsappPromo.ctaText;
-  promoCta.href = getWhatsAppUrl(CONFIG.whatsappPromo.defaultMsg);
-}
+// ABRIR MODAL CHECKOUT DESDE CARRITO
+function openCheckoutModal() {
+  if (cart.length === 0) return;
 
-// 11. Footer
-function renderFooter() {
-  document.getElementById("footer-logo").innerText = CONFIG.business.name;
-  document.getElementById("copyright-name").innerText = CONFIG.business.name;
-  document.getElementById("year").innerText = new Date().getFullYear();
+  const itemsList = document.getElementById("checkout-items-list");
+  const totalPrice = document.getElementById("checkout-total-price");
+  const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-  const footerLinksContainer = document.getElementById("footer-links");
-  footerLinksContainer.innerHTML = CONFIG.navbar.links.map(link => `
-    <a href="${link.url}" class="text-decoration-none text-muted small text-uppercase fw-semibold">${link.name}</a>
+  itemsList.innerHTML = cart.map(i => `
+    <li class="d-flex justify-content-between my-1">
+      <span>${i.quantity}x ${i.name}</span>
+      <span class="fw-bold">$${i.price * i.quantity} MXN</span>
+    </li>
   `).join('');
 
-  const socialsContainer = document.getElementById("footer-socials");
-  socialsContainer.innerHTML = `
-    <a href="${CONFIG.business.socials.facebook}" target="_blank" class="me-3"><i class="bi bi-facebook"></i></a>
-    <a href="${CONFIG.business.socials.instagram}" target="_blank" class="me-3"><i class="bi bi-instagram"></i></a>
-    <a href="${CONFIG.business.socials.linkedin}" target="_blank" class="me-3"><i class="bi bi-linkedin"></i></a>
-    <a href="${CONFIG.business.socials.youtube}" target="_blank"><i class="bi bi-youtube"></i></a>
-  `;
+  totalPrice.innerText = `$${subtotal.toLocaleString()} MXN`;
+
+  // Ocultar Offcanvas y mostrar Modal
+  const cartOffcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('cartOffcanvas'));
+  if (cartOffcanvas) cartOffcanvas.hide();
+
+  if (orderModalObj) orderModalObj.show();
+}
+
+// ENVÍO DE FORMULARIO CON CARRITO A WHATSAPP
+function setupFormHandler() {
+  const form = document.getElementById("orderForm");
+  if (!form) return;
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const buyerName = document.getElementById("buyerName").value;
+    const buyerPhone = document.getElementById("buyerPhone").value;
+    const deliveryType = document.getElementById("deliveryType").value;
+    const paymentMethod = document.getElementById("paymentMethod").value;
+    const date = document.getElementById("deliveryDate").value;
+    const time = document.getElementById("deliveryTime").value;
+    const cardMsg = document.getElementById("cardMessage").value || "Sin dedicatoria";
+
+    const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    const pointsGained = Math.floor(subtotal / 100);
+
+    let message = `🌸 *NUEVO PEDIDO - FLORERÍA NATURA*\n\n`;
+    message += `*--- PRODUCTOS SOLICITADOS ---*\n`;
+    cart.forEach(item => {
+      message += `• ${item.quantity}x ${item.name} ($${item.price * item.quantity} MXN)\n`;
+    });
+
+    message += `\n*TOTAL:* $${subtotal.toLocaleString()} MXN`;
+    message += `\n*Puntos Natura a Ganar:* +${pointsGained} pts\n\n`;
+    message += `*Cliente:* ${buyerName} (${buyerPhone})\n`;
+    message += `*Pago:* ${paymentMethod}\n`;
+    message += `*Modalidad:* ${deliveryType === 'envio' ? 'Envío a Domicilio' : 'Recoger en Tienda'}\n`;
+    message += `*Fecha de Entrega:* ${date} a las ${time} hrs\n`;
+
+    if (deliveryType === "envio") {
+      const recipientName = document.getElementById("recipientName").value;
+      const recipientPhone = document.getElementById("recipientPhone").value;
+      const address = document.getElementById("address").value;
+      const addressRef = document.getElementById("addressRef").value || "Sin referencias";
+
+      message += `\n*--- DATOS DE ENVÍO ---*\n`;
+      message += `*Destinatario:* ${recipientName} (${recipientPhone})\n`;
+      message += `*Dirección:* ${address}\n`;
+      message += `*Referencias:* ${addressRef}\n`;
+    }
+
+    message += `\n*Dedicatoria:* "${cardMsg}"`;
+
+    window.open(`https://wa.me/${CONFIG.business.phone}?text=${encodeURIComponent(message)}`, '_blank');
+    
+    clearCart();
+    if (orderModalObj) orderModalObj.hide();
+  });
+}
+
+function toggleDeliveryFields() {
+  const type = document.getElementById("deliveryType").value;
+  const deliverySection = document.getElementById("deliveryFieldsSection");
+  const requiredInputs = document.querySelectorAll(".delivery-req");
+
+  if (type === "tienda") {
+    deliverySection.style.display = "none";
+    requiredInputs.forEach(i => i.removeAttribute("required"));
+  } else {
+    deliverySection.style.display = "block";
+    requiredInputs.forEach(i => i.setAttribute("required", "true"));
+  }
+}
+
+function setupWhatsAppWidget() {
+  const trigger = document.getElementById("wa-main-trigger");
+  const popup = document.getElementById("wa-popup");
+  const close = document.getElementById("close-popup");
+  const btn = document.getElementById("wa-widget-btn");
+
+  if (!trigger) return;
+
+  trigger.addEventListener("click", () => popup.classList.toggle("show"));
+  close.addEventListener("click", () => popup.classList.remove("show"));
+  btn.href = `https://wa.me/${CONFIG.business.phone}?text=Hola%20Florer%C3%ADa%20Natura,%20quisiera%20consultar%20informaci%C3%B3n.`;
 }

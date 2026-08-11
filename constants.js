@@ -1,153 +1,91 @@
-// constants.js
 const CONFIG = {
   business: {
-    name: "Floristería",
-    phone: "9514990142", // Tu número real de WhatsApp
-    address: "Centro Histórico, Oaxaca, México",
-    schedule: "Lunes a Sábado: 9:00 AM - 8:00 PM",
+    name: "Florería Natura",
+    phone: "529511284003", // Número real de WhatsApp
+    address: "Almendros 600, esq. Manuel Ruiz (Edificio Núñez Banuet), Col. Reforma, 68050 Oaxaca de Juárez, Oax.",
+    schedule: "Lunes a Sábado: 8:00 AM - 10:30 PM | Domingo: 9:00 AM - 5:00 PM",
     socials: {
-      facebook: "https://facebook.com/floristeria",
-      instagram: "https://instagram.com/floristeria",
-      linkedin: "#",
-      youtube: "#"
+      facebook: "https://facebook.com/florerianatura",
+      instagram: "https://instagram.com/florerianatura",
+      twitter: "https://x.com/florerianatura"
     }
   },
 
   topAlert: {
-    text: "Tu seguridad es nuestra prioridad. Entregas 100% seguras y sin contacto físico en todos los pedidos."
+    text: "🌸 ¡Puntos Natura! Acumula 1 punto por cada $100 MXN de compra y úsalos como dinero real."
   },
 
   navbar: {
     links: [
-      { name: "Diseños de Temporada", url: "#productos" },
+      { name: "Catálogo", url: "#productos" },
       { name: "Diseño Especial", url: "#diseno-especial" },
-      { name: "Cómo Funciona", url: "#como-funciona" },
+      { name: "Cómo Ordenar", url: "#como-funciona" },
       { name: "Preguntas", url: "#faq" }
     ],
-    ctaText: "Enviar Flores"
+    ctaText: "Ordenar Ahora"
   },
 
   hero: {
-    title: "Flores para todos los momentos de la vida",
-    subtitle: "Floristas locales trabajando con amor y dedicación",
-    ctaText: "Comprar Ahora",
-    // Imagen de portada actualizada con tu selección:
-    image: "https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=600&q=80"
-  },
-
-  inAHurry: {
-    title: "¿Tienes Prisa?",
-    text: "Selecciona una opción express de entrega para hoy mismo. Revisa la disponibilidad de flores de temporada listas para salir.",
-    ctaText: "Enviar Express"
+    title: "Flores frescas que convierten momentos en recuerdos",
+    subtitle: "Diseños originales, entregas cuidadas y flores de alta calidad en Oaxaca",
+    ctaText: "Ver Catálogo Completo",
+    image: "https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=1200&q=80"
   },
 
   howItWorks: {
-    title: "Cómo funciona",
-    subtitle: "Compra localmente y regala con un significado real, todo en línea.",
-    ctaText: "Comenzar Pedido",
+    title: "Cómo realizar tu pedido",
+    subtitle: "Tres sencillos pasos para enviar emoción a quien más quieres",
+    ctaText: "Iniciar Pedido",
     steps: [
       {
         number: "1",
-        icon: "bi-chat-heart",
-        title: "Cuéntanos tu motivo",
-        description: "¿En quién estás pensando? ¿Por qué deseas enviarle flores? Nosotros te ayudamos incluso a redactar el mensaje perfecto."
+        icon: "bi-flower1",
+        title: "Elige tu diseño favorito",
+        description: "Explora nuestro catálogo de ramos, jarrones y cajas o solicita un diseño personalizado."
       },
       {
         number: "2",
-        icon: "bi-gift",
-        title: "Nosotros nos encargamos",
-        description: "Te enlazamos con un florista artesanal que diseñará y entregará a mano un arreglo único adaptado a ti."
+        icon: "bi-card-checklist",
+        title: "Completa el formulario",
+        description: "Elige si deseas entrega a domicilio o recoger en tienda, y selecciona tu forma de pago."
       },
       {
         number: "3",
-        icon: "bi-envelope-heart",
-        title: "Les encantará el detalle",
-        description: "Disfruta de la tranquilidad de saber que esa persona tan especial recibió flores frescas de la más alta calidad."
+        icon: "bi-truck",
+        title: "Entrega cuidadosa",
+        description: "Elaboramos tu arreglo con flores frescas y lo entregamos puntualmente en la fecha programada."
       }
     ]
   },
 
-  products: [
-    {
-      id: "prod-1",
-      name: "Ramillete Imperial de Rosas",
-      price: 1200,
-      description: "Elegante envoltura en papel coreano con 24 rosas seleccionadas.",
-      image: "https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: "prod-2",
-      name: "Cesta Armonía de Tulipanes",
-      price: 850,
-      description: "Combinación de tulipanes de colores en una delicada cesta artesanal.",
-      image: "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: "prod-3",
-      name: "Girasoles del Sol",
-      price: 650,
-      description: "Girasoles vibrantes envueltos finamente listos para sorprender.",
-      image: "https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      id: "prod-4",
-      name: "Orquídea Premium Doble",
-      price: 1500,
-      description: "Elegante orquídea de doble tallo en base de cerámica fina para interiores.",
-      image: "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=600&q=80"
-    }
-  ],
-
   customBouquet: {
-    title: "¿Buscas un diseño especial?",
-    subtitle: "Si tienes una idea específica en mente o quieres ajustar un arreglo a tu propio presupuesto, nuestros artesanos floristas lo diseñan exclusivamente para ti.",
+    title: "¿Buscas un diseño a tu medida?",
+    subtitle: "En Florería Natura creamos arreglos con intención. Si tienes una idea o presupuesto específico, lo hacemos realidad para ti.",
     options: [
-      "Tú eliges el tipo de flor (Rosas, Tulipanes, Girasoles, Gerberas)",
-      "Define la paleta de colores ideal para la ocasión",
-      "Elige el tamaño y presentación (Ramo, caja premium, base de cerámica o madera)",
-      "Nos adaptamos por completo al presupuesto que tengas establecido"
+      "Elige tus flores preferidas (Rosas, Girasoles, Tulipanes, Gerberas, Gladiolas)",
+      "Selecciona la paleta de colores para la ocasión",
+      "Elige la presentación: Ramo en papel coreano, Jarrón de cristal o Caja fina",
+      "Nos adaptamos 100% al presupuesto que desees asignar"
     ],
-    ctaText: "Cotizar Diseño Especial"
-  },
-
-  midCta: {
-    title: "¿En qué estás pensando para hoy?",
-    text: "Nuestra comunidad de diseñadores florales está lista para crear arreglos con un valor real que marquen la diferencia en cada momento especial.",
-    ctaText: "Celebrar Momentos",
-    image: "https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80"
+    ctaText: "Cotizar Arreglo Especial"
   },
 
   faqs: [
     {
-      question: "¿Cuál es el costo de entrega a domicilio?",
-      answer: "Nuestra tarifa estándar de envío se calcula según el código postal del destinatario, garantizando un manejo delicado de cada arreglo durante el trayecto."
+      question: "¿Cuáles son las zonas de envío gratis?",
+      answer: "El envío es gratuito en compras seleccionadas y según la zona dentro de Oaxaca de Juárez y municipios conurbados."
     },
     {
-      question: "¿Por qué enviar flores con nosotros?",
-      answer: "Porque trabajamos exclusivamente con floristas locales experimentados y flores de corte diario, asegurando diseños premium y una frescura excepcional."
+      question: "¿Puedo pedir entregas para el mismo día?",
+      answer: "Sí, contamos con entregas el mismo día. Te sugerimos realizar tu orden con anticipación para asegurar disponibilidad de horario."
     },
     {
-      question: "¿Ofrecen entregas el mismo día?",
-      answer: "Sí, todos los pedidos locales realizados antes de las 2:00 PM se pueden entregar el mismo día de manera express."
+      question: "¿Cuáles son las formas de pago?",
+      answer: "Aceptamos pago en efectivo (al recoger o contra entrega según zona) y transferencia bancaria directa."
     },
     {
-      question: "¿Puedo personalizar las flores de mi arreglo?",
-      answer: "Por supuesto. Puedes contactarnos de manera directa para elegir flores específicas, colores y el tamaño ideal de tu presupuesto."
-    },
-    {
-      question: "¿Cómo puedo realizar el pago?",
-      answer: "Aceptamos transferencias electrónicas directas, depósitos bancarios y pagos con tarjeta mediante un enlace de cobro seguro."
-    },
-    {
-      question: "¿Recibiré una confirmación de entrega?",
-      answer: "Sí, te enviaremos una notificación de WhatsApp con la foto del arreglo terminado una vez que haya sido entregado en su destino."
+      question: "¿Cómo funciona el Programa Puntos Natura?",
+      answer: "Por cada $100 MXN de compra acumulas 1 Punto Natura. Cada punto equivale a $1 MXN de descuento directo en tus siguientes pedidos."
     }
-  ],
-
-  whatsappPromo: {
-    title: "Mira nuestro catálogo diario en WhatsApp",
-    subtitle: "Subimos diseños frescos todas las mañanas a nuestros estados. Agréganos para no perderte ninguna flor de temporada.",
-    ctaText: "Ver Catálogo Activo",
-    defaultMsg: "Hola, me gustaría agendar su contacto para ver sus diseños florales de temporada y consultar precios."
-  }
+  ]
 };
