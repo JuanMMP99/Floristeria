@@ -10,7 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Renderizar Vistas
   if (document.getElementById("featured-products-container")) renderFeaturedProducts();
-  if (document.getElementById("catalog-container")) applyFilters();
+  // Nota: la inicialización del catálogo (applyFilters) la maneja productos.js
+  // en productos.html, para evitar doble renderizado.
 
   updateCartUI();
   setupWhatsAppWidget();

@@ -1,64 +1,70 @@
-let currentCategory = "Todos";
-let currentPage = 1;
-const itemsPerPage = 16;
-
 document.addEventListener("DOMContentLoaded", () => {
-  renderCategories();
+  populateCategoryFilter();
   applyFilters();
 });
 
-function renderCategories() {
-  const container = document.getElementById("categories-list");
-  if (!container) return;
+// Llena el <select> de categorías dinámicamente a partir de CATEGORIES
+// para que nunca se desincronice con los datos reales del catálogo.
+function populateCategoryFilter() {
+  const select = document.getElementById("categoryFilter");
+  if (!select) return;
 
-  container.innerHTML = CATEGORIES.map(cat => `
-    <button 
-      class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 px-3 py-2 rounded-3 mb-1 ${currentCategory === cat.name ? 'active bg-light-pink text-brand fw-bold' : 'text-secondary'}"
-      onclick="filterByCategory('${cat.name}')">
-      <span>${cat.name}</span>
-      <span class="badge ${currentCategory === cat.name ? 'bg-brand' : 'bg-light text-muted'} rounded-pill">${cat.count}</span>
-    </button>
-  `).join('');
-}
+  const options = CATEGORIES
+    .filter(cat => cat.name !== "Todos")
+    .map(cat => `<option value="${cat.name}">${cat.name} (${cat.count})</option>`)
+    .join('');
 
-function filterByCategory(categoryName) {
-  currentCategory = categoryName;
-  currentPage = 1;
-  renderCategories();
-  applyFilters();
+  select.innerHTML = `<option value="all">Todas las categorías</option>${options}`;
 }
 
 function applyFilters() {
-  const searchInput = document.getElementById("search-input");
+  const searchInput = document.getElementById("searchInput");
+  const categoryFilter = document.getElementById("categoryFilter");
+  const priceRange = document.getElementById("priceRange");
+  const sortOrder = document.getElementById("sortOrder");
+  const priceDisplay = document.getElementById("priceDisplay");
+
   const query = searchInput ? searchInput.value.toLowerCase().trim() : "";
+  const category = categoryFilter ? categoryFilter.value : "all";
+  const maxPrice = priceRange ? Number(priceRange.value) : Infinity;
+  const order = sortOrder ? sortOrder.value : "default";
+
+  if (priceDisplay && priceRange) {
+    priceDisplay.innerText = `$${Number(priceRange.value).toLocaleString('es-MX')} MXN`;
+  }
 
   let filtered = CATALOG.filter(p => {
-    const matchCategory = currentCategory === "Todos" || p.category === currentCategory;
+    const matchCategory = category === "all" || p.category === category;
     const matchSearch = p.name.toLowerCase().includes(query);
-    return matchCategory && matchSearch;
+    const matchPrice = p.price <= maxPrice;
+    return matchCategory && matchSearch && matchPrice;
   });
 
+  if (order === "low-high") {
+    filtered = filtered.slice().sort((a, b) => a.price - b.price);
+  } else if (order === "high-low") {
+    filtered = filtered.slice().sort((a, b) => b.price - a.price);
+  }
+
   renderGrid(filtered);
-  renderPagination(filtered.length);
+  updateResultsUI(filtered.length);
+}
+
+function updateResultsUI(count) {
+  const countLabel = document.getElementById("productCount");
+  const noResults = document.getElementById("noResults");
+  const container = document.getElementById("catalog-container");
+
+  if (countLabel) countLabel.innerText = count;
+  if (noResults) noResults.classList.toggle("d-none", count !== 0);
+  if (container) container.classList.toggle("d-none", count === 0);
 }
 
 function renderGrid(products) {
   const container = document.getElementById("catalog-container");
   if (!container) return;
 
-  const start = (currentPage - 1) * itemsPerPage;
-  const pageProducts = products.slice(start, start + itemsPerPage);
-
-  if (pageProducts.length === 0) {
-    container.innerHTML = `
-      <div class="col-12 text-center py-5">
-        <p class="text-muted fs-5">No se encontraron productos en esta categoría.</p>
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = pageProducts.map(p => `
+  container.innerHTML = products.map(p => `
     <div class="col-6 col-md-4 col-lg-3">
       <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden product-card d-flex flex-column justify-content-between">
         <img src="${p.image}" class="card-img-top" alt="${p.name}">
@@ -79,30 +85,16 @@ function renderGrid(products) {
   `).join('');
 }
 
-function renderPagination(totalItems) {
-  const container = document.getElementById("pagination-container");
-  if (!container) return;
+function resetFilters() {
+  const searchInput = document.getElementById("searchInput");
+  const categoryFilter = document.getElementById("categoryFilter");
+  const priceRange = document.getElementById("priceRange");
+  const sortOrder = document.getElementById("sortOrder");
 
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  if (totalPages <= 1) {
-    container.innerHTML = "";
-    return;
-  }
+  if (searchInput) searchInput.value = "";
+  if (categoryFilter) categoryFilter.value = "all";
+  if (priceRange) priceRange.value = priceRange.max;
+  if (sortOrder) sortOrder.value = "default";
 
-  let html = `<ul class="pagination pagination-sm justify-content-center m-0">`;
-  for (let i = 1; i <= totalPages; i++) {
-    html += `
-      <li class="page-item ${i === currentPage ? 'active' : ''}">
-        <button class="page-link border-0 ${i === currentPage ? 'bg-brand text-white' : 'text-dark'}" onclick="goToPage(${i})">${i}</button>
-      </li>
-    `;
-  }
-  html += `</ul>`;
-  container.innerHTML = html;
-}
-
-function goToPage(page) {
-  currentPage = page;
   applyFilters();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
