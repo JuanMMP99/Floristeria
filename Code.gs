@@ -311,7 +311,7 @@ function handleCrearPedido(data) {
   // 📧 ENVÍO DE NOTIFICACIÓN POR CORREO
   // =========================================================================
   try {
-    const emailDestino = 'juanposicionsatelital@gmail.com'; // 👈 Reemplaza por tu dirección de correo
+    const emailDestino = 'juanposicionsatelital@gmail.com, floristerianatura@gnail.com'; // 👈 Reemplaza por tu dirección de correo
     const asunto = `🌸 Nuevo Pedido: ${cliente} - ${fechaNorm}`;
 
     const listaProductos = productosArr
@@ -454,7 +454,7 @@ function getTestUrl() {
 function configurarUrlAdmin() {
   // 🔧 EDITA ESTE VALOR ANTES DE EJECUTAR: pega aquí la URL de tu implementación
   // dedicada al panel (la segunda que crees, distinta de la de la API pública).
-  const urlDelPanelAdmin = 'PEGA_AQUI_LA_URL_DE_TU_DEPLOYMENT_ADMIN';
+  const urlDelPanelAdmin = 'https://script.google.com/macros/s/AKfycbyfBlfl2xd7qr2YSy-au8EQe6y8clfqoYijfzh1PTBCPOtyWq0JG5vN8daUbWXpz0bHbg/exec';
 
   PropertiesService.getScriptProperties().setProperty('ADMIN_DEPLOYMENT_URL', urlDelPanelAdmin.trim());
   Logger.log('✅ URL del panel administrativo configurada: ' + urlDelPanelAdmin.trim());
@@ -1057,3 +1057,4 @@ function resetearSetup() {
   PropertiesService.getScriptProperties().deleteProperty('SETUP_COMPLETE');
   Logger.log('✅ Permiso de configuración restablecido correctamente.');
 }
+
