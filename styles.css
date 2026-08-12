@@ -349,3 +349,13 @@ body {
     max-height: 350px;
   }
 }
+/* ==========================================================================
+   HONEYPOT ANTI-SPAM (invisible para personas, visible para bots)
+   ========================================================================== */
+.hp-field {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}

@@ -1,4 +1,8 @@
 const CONFIG = {
+  // URL de Google Apps Script (REEMPLAZAR con la URL de TU implementación pública,
+  // igual que se hizo en el proyecto de C&H Consultorio Dental)
+  API_URL: 'https://script.google.com/macros/s/AKfycbxLx45ZkKgcMKMQlvHkL07sSZ6ROfEmgHnNCAIKzOpojy1Towhte6mzxLF6VOlCTajO9Q/exec',
+
   business: {
     name: "Florería Natura",
     phone: "529511284003", // Número real de WhatsApp
