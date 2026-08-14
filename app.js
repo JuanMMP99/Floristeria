@@ -1,5 +1,5 @@
 // Estado del Carrito respaldado en LocalStorage
-let cart = JSON.parse(localStorage.getItem('natura_cart')) || [];
+let cart = JSON.parse(localStorage.getItem('florería_cart')) || [];
 let orderModalObj = null;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -91,7 +91,7 @@ function clearCart() {
 }
 
 function saveCart() {
-  localStorage.setItem('natura_cart', JSON.stringify(cart));
+  localStorage.setItem('florería_cart', JSON.stringify(cart));
 }
 
 function updateCartUI() {
@@ -111,7 +111,7 @@ function updateCartUI() {
 
   // Puntos calculados ($100 MXN = 1 Punto)
   const points = Math.floor(subtotal / 100);
-  if (pointsDisplay) pointsDisplay.innerText = `+${points} Puntos Natura`;
+  if (pointsDisplay) pointsDisplay.innerText = `+${points} Puntos florería`;
 
   if (checkoutBtn) {
     checkoutBtn.disabled = cart.length === 0;

@@ -1,9 +1,9 @@
 /**
- * CRM de Pedidos - Florería Natura
+ * CRM de Pedidos - Florería florería
  * Sistema de gestión de pedidos con Google Sheets
  */
 
-const SHEET_NAME = 'Pedidos';
+const SHEET_NAME = "Pedidos";
 
 // Límites de longitud para evitar abuso desde el formulario público
 const FIELD_LIMITS = {
@@ -14,7 +14,7 @@ const FIELD_LIMITS = {
   destinatario: 100,
   telefonoDestinatario: 20,
   dedicatoria: 500,
-  productos: 2000
+  productos: 2000,
 };
 
 // Ventana de tiempo (minutos) para bloquear solicitudes duplicadas del mismo teléfono
@@ -23,16 +23,23 @@ const RATE_LIMIT_MINUTES = 5;
 /* ==========================================================================
    MÓDULO DE ADMINISTRACIÓN (PANEL PRIVADO)
    ========================================================================== */
-const USERS_SHEET_NAME = 'Usuarios';
+const USERS_SHEET_NAME = "Usuarios";
 const SESSION_DURATION_SECONDS = 21600; // 6 horas (máximo permitido por CacheService)
-const ESTADOS_VALIDOS = ['Pendiente', 'Confirmado', 'En preparación', 'En camino', 'Entregado', 'Cancelado'];
+const ESTADOS_VALIDOS = [
+  "Pendiente",
+  "Confirmado",
+  "En preparación",
+  "En camino",
+  "Entregado",
+  "Cancelado",
+];
 
 // Datos de marca para el comprobante en PDF (espejo de CONFIG.business en constants.js)
-const BRAND_NAME = 'Florería Natura';
-const BRAND_PHONE = '52 951 128 4003';
+const BRAND_NAME = "Florería Oaxaca";
+const BRAND_PHONE = "52 951 499 0142";
 
 // Respaldo semanal de la hoja de Pedidos
-const BACKUP_FOLDER_NAME = 'Respaldos CRM - Pedidos Florería Natura';
+const BACKUP_FOLDER_NAME = "Respaldos CRM - Pedidos Florería Oaxaca";
 const MAX_BACKUPS_TO_KEEP = 12; // ~3 meses de respaldos semanales
 
 /**
@@ -43,7 +50,7 @@ const MAX_BACKUPS_TO_KEEP = 12; // ~3 meses de respaldos semanales
  * - Trunca a una longitud máxima
  */
 function sanitizeForSheet(value, maxLength) {
-  if (value === null || value === undefined) return '';
+  if (value === null || value === undefined) return "";
   let str = String(value).trim();
   if (/^[=+\-@]/.test(str)) {
     str = "'" + str;
@@ -58,7 +65,7 @@ function sanitizeForSheet(value, maxLength) {
  * Valida que un teléfono tenga entre 10 y 15 dígitos (solo números)
  */
 function isValidPhone(telefono) {
-  const digits = String(telefono || '').replace(/\D/g, '');
+  const digits = String(telefono || "").replace(/\D/g, "");
   return digits.length >= 10 && digits.length <= 15;
 }
 
@@ -69,11 +76,11 @@ function isValidPhone(telefono) {
 function hasRecentDuplicateRequest(telefono) {
   const sheet = getSheet();
   const values = sheet.getDataRange().getValues();
-  const digits = String(telefono || '').replace(/\D/g, '');
+  const digits = String(telefono || "").replace(/\D/g, "");
   const cutoff = new Date(Date.now() - RATE_LIMIT_MINUTES * 60 * 1000);
 
   for (let i = values.length - 1; i >= 1; i--) {
-    const rowPhoneDigits = String(values[i][1] || '').replace(/\D/g, '');
+    const rowPhoneDigits = String(values[i][1] || "").replace(/\D/g, "");
     const rowTimestamp = values[i][15];
     if (rowPhoneDigits && rowPhoneDigits === digits && rowTimestamp) {
       const ts = new Date(rowTimestamp);
@@ -89,20 +96,20 @@ function hasRecentDuplicateRequest(telefono) {
  * Normaliza cualquier valor de fecha al formato YYYY-MM-DD
  */
 function normalizeDate(val) {
-  if (!val) return '';
+  if (!val) return "";
   if (val instanceof Date) {
-    return Utilities.formatDate(val, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    return Utilities.formatDate(val, Session.getScriptTimeZone(), "yyyy-MM-dd");
   }
   const str = String(val).trim();
-  if (str.includes('T')) {
-    return str.split('T')[0];
+  if (str.includes("T")) {
+    return str.split("T")[0];
   }
   if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
     return str;
   }
   const d = new Date(str);
   if (!isNaN(d.getTime())) {
-    return Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    return Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd");
   }
   return str;
 }
@@ -111,15 +118,15 @@ function normalizeDate(val) {
  * Normaliza cualquier valor de hora al formato HH:mm (ej: "9:00" -> "09:00")
  */
 function normalizeTime(val) {
-  if (!val) return '';
+  if (!val) return "";
   if (val instanceof Date) {
-    return Utilities.formatDate(val, Session.getScriptTimeZone(), 'HH:mm');
+    return Utilities.formatDate(val, Session.getScriptTimeZone(), "HH:mm");
   }
   let str = String(val).trim();
-  const parts = str.split(':');
+  const parts = str.split(":");
   if (parts.length >= 2) {
-    let h = parts[0].padStart(2, '0');
-    let m = parts[1].padStart(2, '0');
+    let h = parts[0].padStart(2, "0");
+    let m = parts[1].padStart(2, "0");
     return `${h}:${m}`;
   }
   return str;
@@ -136,47 +143,62 @@ function doGet(e) {
     // importar qué parámetros traiga la petición. Cualquier otra implementación
     // (por ejemplo la pública, usada por el formulario de pedidos) NUNCA sirve el
     // panel, así conozcan o no el parámetro "?page=admin".
-    const adminDeploymentUrl = PropertiesService.getScriptProperties().getProperty('ADMIN_DEPLOYMENT_URL');
+    const adminDeploymentUrl =
+      PropertiesService.getScriptProperties().getProperty(
+        "ADMIN_DEPLOYMENT_URL",
+      );
     const currentUrl = ScriptApp.getService().getUrl();
 
     if (adminDeploymentUrl && currentUrl === adminDeploymentUrl) {
-      return HtmlService.createHtmlOutputFromFile('Admin')
-        .setTitle('Panel Administrativo - Florería Natura')
-        .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+      return HtmlService.createHtmlOutputFromFile("Admin")
+        .setTitle("Panel Administrativo - Florería Oaxaca")
+        .addMetaTag("viewport", "width=device-width, initial-scale=1")
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
     }
 
     if (!e || !e.parameter) {
-      return buildResponse({
-        error: 'Solicitud inválida. Se requieren parámetros.',
-        help: 'Usa ?action=testConnection'
-      }, false);
+      return buildResponse(
+        {
+          error: "Solicitud inválida. Se requieren parámetros.",
+          help: "Usa ?action=testConnection",
+        },
+        false,
+      );
     }
 
     const action = e.parameter.action;
 
     if (!action) {
-      return buildResponse({
-        message: 'API de Pedidos funcionando correctamente',
-        actions: ['testConnection']
-      }, true);
+      return buildResponse(
+        {
+          message: "API de Pedidos funcionando correctamente",
+          actions: ["testConnection"],
+        },
+        true,
+      );
     }
 
     switch (action) {
-      case 'testConnection':
-        return buildResponse({ message: 'Conexión exitosa' }, true);
+      case "testConnection":
+        return buildResponse({ message: "Conexión exitosa" }, true);
       default:
-        return buildResponse({
-          error: 'Acción no válida',
-          actions: ['testConnection']
-        }, false);
+        return buildResponse(
+          {
+            error: "Acción no válida",
+            actions: ["testConnection"],
+          },
+          false,
+        );
     }
   } catch (error) {
-    console.error('Error en doGet:', error);
-    return buildResponse({
-      error: error.toString(),
-      stack: error.stack
-    }, false);
+    console.error("Error en doGet:", error);
+    return buildResponse(
+      {
+        error: error.toString(),
+        stack: error.stack,
+      },
+      false,
+    );
   }
 }
 
@@ -185,75 +207,151 @@ function doGet(e) {
  */
 function doPost(e) {
   try {
-    if (!e || !e.postData || !e.postData.contents) {
-      return buildResponse({
-        error: 'Solicitud POST inválida. Se requiere JSON en el cuerpo.'
-      }, false);
+    const contents = JSON.parse(e.postData.contents);
+    const action = contents.action;
+    const data = contents.data || contents.visita;
+
+    if (action === "crearPedido") {
+      return responseJSON(guardarPedidoEnHoja(data));
+    } else if (action === "registrarVisita") {
+      return responseJSON(guardarVisitaEnHoja(data));
     }
 
-    const request = JSON.parse(e.postData.contents);
-    const action = request.action;
-    const data = request.data;
-
-    if (!action) {
-      return buildResponse({
-        error: 'Se requiere el campo "action" en la solicitud'
-      }, false);
-    }
-
-    switch (action) {
-      case 'crearPedido':
-        return handleCrearPedido(data);
-      default:
-        return buildResponse({
-          error: 'Acción POST no válida',
-          actions: ['crearPedido']
-        }, false);
-    }
-  } catch (error) {
-    console.error('Error en doPost:', error);
-    return buildResponse({
-      error: error.toString(),
-      stack: error.stack
-    }, false);
+    return responseJSON({ status: "error", message: "Acción no válida" });
+  } catch (err) {
+    return responseJSON({ status: "error", message: err.toString() });
   }
+}
+
+function doGet(e) {
+  return HtmlService.createTemplateFromFile("admin")
+    .evaluate()
+    .setTitle("Panel Administrativo - Florería")
+    .addMetaTag("viewport", "width=device-width, initial-scale=1.0");
+}
+
+function guardarPedidoEnHoja(data) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Pedidos");
+  const uuid =
+    "PED-" + Utilities.formatDate(new Date(), "GMT-6", "yyyyMMdd-HHmmss");
+
+  sheet.appendRow([
+    uuid,
+    new Date(),
+    data.cliente,
+    data.telefono,
+    data.tipoEntrega,
+    data.destinatario,
+    data.telefonoDestinatario,
+    data.direccion,
+    data.referencias,
+    data.metodoPago,
+    data.fechaEntrega,
+    data.horaEntrega,
+    data.dedicatoria,
+    JSON.stringify(data.productos),
+    data.total,
+    data.puntos,
+    "Pendiente",
+  ]);
+
+  return { status: "success", data: { uuid: uuid } };
+}
+
+function guardarVisitaEnHoja(data) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Visitas");
+  if (sheet) {
+    sheet.appendRow([
+      new Date(),
+      data.url,
+      data.referrer,
+      data.userAgent,
+      data.esMovil,
+    ]);
+  }
+  return { status: "success", data: "Visita registrada" };
+}
+
+function responseJSON(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(
+    ContentService.MimeType.JSON,
+  );
 }
 
 /**
  * Crea un nuevo pedido y envía notificación por correo electrónico
  */
 function handleCrearPedido(data) {
-  const required = ['cliente', 'telefono', 'tipoEntrega', 'metodoPago', 'fechaEntrega', 'horaEntrega', 'productos', 'total'];
-  const missing = required.filter(field => data[field] === undefined || data[field] === null || data[field] === '');
+  const required = [
+    "cliente",
+    "telefono",
+    "tipoEntrega",
+    "metodoPago",
+    "fechaEntrega",
+    "horaEntrega",
+    "productos",
+    "total",
+  ];
+  const missing = required.filter(
+    (field) =>
+      data[field] === undefined || data[field] === null || data[field] === "",
+  );
 
   if (missing.length > 0) {
-    return buildResponse({
-      error: 'Faltan campos requeridos',
-      missing: missing,
-      required: required
-    }, false);
+    return buildResponse(
+      {
+        error: "Faltan campos requeridos",
+        missing: missing,
+        required: required,
+      },
+      false,
+    );
   }
 
   // Sanear y truncar cada campo antes de usarlo
   const cliente = sanitizeForSheet(data.cliente, FIELD_LIMITS.cliente);
   const telefono = sanitizeForSheet(data.telefono, FIELD_LIMITS.telefono);
-  const tipoEntrega = data.tipoEntrega === 'tienda' ? 'tienda' : 'envio';
+  const tipoEntrega = data.tipoEntrega === "tienda" ? "tienda" : "envio";
   const direccion = sanitizeForSheet(data.direccion, FIELD_LIMITS.direccion);
-  const referencias = sanitizeForSheet(data.referencias, FIELD_LIMITS.referencias);
-  const destinatario = sanitizeForSheet(data.destinatario, FIELD_LIMITS.destinatario);
-  const telefonoDestinatario = sanitizeForSheet(data.telefonoDestinatario, FIELD_LIMITS.telefonoDestinatario);
+  const referencias = sanitizeForSheet(
+    data.referencias,
+    FIELD_LIMITS.referencias,
+  );
+  const destinatario = sanitizeForSheet(
+    data.destinatario,
+    FIELD_LIMITS.destinatario,
+  );
+  const telefonoDestinatario = sanitizeForSheet(
+    data.telefonoDestinatario,
+    FIELD_LIMITS.telefonoDestinatario,
+  );
   const metodoPago = sanitizeForSheet(data.metodoPago, 50);
-  const dedicatoria = sanitizeForSheet(data.dedicatoria, FIELD_LIMITS.dedicatoria);
-  const estado = 'Pendiente';
+  const dedicatoria = sanitizeForSheet(
+    data.dedicatoria,
+    FIELD_LIMITS.dedicatoria,
+  );
+  const estado = "Pendiente";
   const fecha = data.fechaEntrega;
   const hora = data.horaEntrega;
 
   if (!isValidPhone(telefono)) {
-    return buildResponse({ error: 'El teléfono debe tener entre 10 y 15 dígitos' }, false);
+    return buildResponse(
+      { error: "El teléfono debe tener entre 10 y 15 dígitos" },
+      false,
+    );
   }
 
-  if (tipoEntrega === 'envio' && (!direccion || !destinatario || !telefonoDestinatario)) {
-    return buildResponse({ error: 'Para envío a domicilio se requieren destinatario, teléfono del destinatario y dirección' }, false);
+  if (
+    tipoEntrega === "envio" &&
+    (!direccion || !destinatario || !telefonoDestinatario)
+  ) {
+    return buildResponse(
+      {
+        error:
+          "Para envío a domicilio se requieren destinatario, teléfono del destinatario y dirección",
+      },
+      false,
+    );
   }
 
   const fechaNorm = normalizeDate(fecha);
@@ -261,22 +359,34 @@ function handleCrearPedido(data) {
 
   // Protección anti-spam
   if (hasRecentDuplicateRequest(telefono)) {
-    return buildResponse({
-      error: 'Ya recibimos un pedido reciente con este teléfono. Espera unos minutos antes de intentar de nuevo.'
-    }, false);
+    return buildResponse(
+      {
+        error:
+          "Ya recibimos un pedido reciente con este teléfono. Espera unos minutos antes de intentar de nuevo.",
+      },
+      false,
+    );
   }
 
   // Los productos llegan como array [{id, name, price, quantity}]; los guardamos como JSON
   let productosArr = [];
   try {
-    productosArr = Array.isArray(data.productos) ? data.productos : JSON.parse(data.productos);
+    productosArr = Array.isArray(data.productos)
+      ? data.productos
+      : JSON.parse(data.productos);
   } catch (err) {
-    return buildResponse({ error: 'Formato de productos inválido' }, false);
+    return buildResponse({ error: "Formato de productos inválido" }, false);
   }
   if (!productosArr || productosArr.length === 0) {
-    return buildResponse({ error: 'El pedido debe incluir al menos un producto' }, false);
+    return buildResponse(
+      { error: "El pedido debe incluir al menos un producto" },
+      false,
+    );
   }
-  const productosJson = sanitizeForSheet(JSON.stringify(productosArr), FIELD_LIMITS.productos);
+  const productosJson = sanitizeForSheet(
+    JSON.stringify(productosArr),
+    FIELD_LIMITS.productos,
+  );
 
   const total = Number(data.total) || 0;
   const puntos = Math.floor(total / 100);
@@ -302,7 +412,7 @@ function handleCrearPedido(data) {
     puntos,
     estado,
     new Date().toISOString(),
-    Utilities.getUuid()
+    Utilities.getUuid(),
   ];
 
   sheet.getRange(nextRow, 1, 1, rowData.length).setValues([rowData]);
@@ -311,12 +421,12 @@ function handleCrearPedido(data) {
   // 📧 ENVÍO DE NOTIFICACIÓN POR CORREO
   // =========================================================================
   try {
-    const emailDestino = 'juanposicionsatelital@gmail.com, floristerianatura@gnail.com'; // 👈 Reemplaza por tu dirección de correo
+    const emailDestino = "juanposicionsatelital@gmail.com"; // 👈 Reemplaza por tu dirección de correo
     const asunto = `🌸 Nuevo Pedido: ${cliente} - ${fechaNorm}`;
 
     const listaProductos = productosArr
-      .map(p => `${p.quantity}x ${p.name} ($${p.price * p.quantity} MXN)`)
-      .join('<br>');
+      .map((p) => `${p.quantity}x ${p.name} ($${p.price * p.quantity} MXN)`)
+      .join("<br>");
 
     const htmlBody = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px;">
@@ -325,16 +435,20 @@ function handleCrearPedido(data) {
                 <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
                     <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Cliente:</td><td style="padding: 8px;">${cliente}</td></tr>
                     <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Teléfono:</td><td style="padding: 8px;">${telefono}</td></tr>
-                    <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Modalidad:</td><td style="padding: 8px;">${tipoEntrega === 'envio' ? 'Envío a Domicilio' : 'Recoger en Tienda'}</td></tr>
-                    ${tipoEntrega === 'envio' ? `
+                    <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Modalidad:</td><td style="padding: 8px;">${tipoEntrega === "envio" ? "Envío a Domicilio" : "Recoger en Tienda"}</td></tr>
+                    ${
+                      tipoEntrega === "envio"
+                        ? `
                     <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Destinatario:</td><td style="padding: 8px;">${destinatario} (${telefonoDestinatario})</td></tr>
-                    <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Dirección:</td><td style="padding: 8px;">${direccion}${referencias ? ' — ' + referencias : ''}</td></tr>
-                    ` : ''}
+                    <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Dirección:</td><td style="padding: 8px;">${direccion}${referencias ? " — " + referencias : ""}</td></tr>
+                    `
+                        : ""
+                    }
                     <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Método de Pago:</td><td style="padding: 8px;">${metodoPago}</td></tr>
                     <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Fecha de Entrega:</td><td style="padding: 8px;">${fechaNorm} a las ${horaNorm} hrs</td></tr>
                     <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Productos:</td><td style="padding: 8px;">${listaProductos}</td></tr>
-                    <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Total:</td><td style="padding: 8px;"><strong>$${total.toLocaleString()} MXN</strong> (+${puntos} Puntos Natura)</td></tr>
-                    <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Dedicatoria:</td><td style="padding: 8px;">${dedicatoria || '—'}</td></tr>
+                    <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Total:</td><td style="padding: 8px;"><strong>$${total.toLocaleString()} MXN</strong> (+${puntos} Puntos florería)</td></tr>
+                    <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Dedicatoria:</td><td style="padding: 8px;">${dedicatoria || "—"}</td></tr>
                     <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Estatus:</td><td style="padding: 8px;"><span style="background-color: #ffeaa7; padding: 3px 8px; border-radius: 4px; font-weight: bold;">${estado}</span></td></tr>
                 </table>
             </div>
@@ -343,27 +457,30 @@ function handleCrearPedido(data) {
     MailApp.sendEmail({
       to: emailDestino,
       subject: asunto,
-      htmlBody: htmlBody
+      htmlBody: htmlBody,
     });
   } catch (e) {
-    console.error('Error al enviar la notificación por correo:', e);
+    console.error("Error al enviar la notificación por correo:", e);
   }
   // =========================================================================
 
-  return buildResponse({
-    success: true,
-    message: 'Pedido registrado correctamente',
-    data: {
-      cliente,
-      telefono,
-      tipoEntrega,
-      fecha: fechaNorm,
-      hora: horaNorm,
-      total,
-      puntos,
-      estado
-    }
-  }, true);
+  return buildResponse(
+    {
+      success: true,
+      message: "Pedido registrado correctamente",
+      data: {
+        cliente,
+        telefono,
+        tipoEntrega,
+        fecha: fechaNorm,
+        hora: horaNorm,
+        total,
+        puntos,
+        estado,
+      },
+    },
+    true,
+  );
 }
 
 /**
@@ -376,26 +493,26 @@ function getSheet() {
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
     const headers = [
-      'Cliente',
-      'Teléfono',
-      'TipoEntrega',
-      'Dirección',
-      'Referencias',
-      'Destinatario',
-      'TelefonoDestinatario',
-      'MetodoPago',
-      'FechaEntrega',
-      'HoraEntrega',
-      'Dedicatoria',
-      'Productos',
-      'Total',
-      'Puntos',
-      'Estado',
-      'Timestamp',
-      'UUID'
+      "Cliente",
+      "Teléfono",
+      "TipoEntrega",
+      "Dirección",
+      "Referencias",
+      "Destinatario",
+      "TelefonoDestinatario",
+      "MetodoPago",
+      "FechaEntrega",
+      "HoraEntrega",
+      "Dedicatoria",
+      "Productos",
+      "Total",
+      "Puntos",
+      "Estado",
+      "Timestamp",
+      "UUID",
     ];
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
     sheet.setFrozenRows(1);
   }
 
@@ -406,12 +523,12 @@ function getSheet() {
  * Construye la respuesta JSON
  */
 function buildResponse(data, success = true) {
-  return ContentService
-    .createTextOutput(JSON.stringify({
-      status: success ? 'success' : 'error',
-      data: data
-    }))
-    .setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(
+    JSON.stringify({
+      status: success ? "success" : "error",
+      data: data,
+    }),
+  ).setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
@@ -422,19 +539,25 @@ function testConnection() {
     const sheet = getSheet();
     const lastRow = sheet.getLastRow();
 
-    Logger.log('✅ Conexión exitosa a la hoja de cálculo');
+    Logger.log("✅ Conexión exitosa a la hoja de cálculo");
     Logger.log(`📊 Pedidos registrados: ${lastRow - 1}`);
 
-    return buildResponse({
-      message: 'Conexión exitosa',
-      pedidosRegistrados: lastRow - 1,
-      sheetName: SHEET_NAME
-    }, true);
+    return buildResponse(
+      {
+        message: "Conexión exitosa",
+        pedidosRegistrados: lastRow - 1,
+        sheetName: SHEET_NAME,
+      },
+      true,
+    );
   } catch (error) {
-    Logger.log('❌ Error:', error);
-    return buildResponse({
-      error: error.toString()
-    }, false);
+    Logger.log("❌ Error:", error);
+    return buildResponse(
+      {
+        error: error.toString(),
+      },
+      false,
+    );
   }
 }
 
@@ -443,7 +566,7 @@ function testConnection() {
  */
 function getTestUrl() {
   const url = ScriptApp.getService().getUrl();
-  return url + '?action=testConnection';
+  return url + "?action=testConnection";
 }
 
 /**
@@ -454,10 +577,16 @@ function getTestUrl() {
 function configurarUrlAdmin() {
   // 🔧 EDITA ESTE VALOR ANTES DE EJECUTAR: pega aquí la URL de tu implementación
   // dedicada al panel (la segunda que crees, distinta de la de la API pública).
-  const urlDelPanelAdmin = 'https://script.google.com/macros/s/AKfycbyfBlfl2xd7qr2YSy-au8EQe6y8clfqoYijfzh1PTBCPOtyWq0JG5vN8daUbWXpz0bHbg/exec';
+  const urlDelPanelAdmin =
+    "https://script.google.com/macros/s/AKfycbyfBlfl2xd7qr2YSy-au8EQe6y8clfqoYijfzh1PTBCPOtyWq0JG5vN8daUbWXpz0bHbg/exec";
 
-  PropertiesService.getScriptProperties().setProperty('ADMIN_DEPLOYMENT_URL', urlDelPanelAdmin.trim());
-  Logger.log('✅ URL del panel administrativo configurada: ' + urlDelPanelAdmin.trim());
+  PropertiesService.getScriptProperties().setProperty(
+    "ADMIN_DEPLOYMENT_URL",
+    urlDelPanelAdmin.trim(),
+  );
+  Logger.log(
+    "✅ URL del panel administrativo configurada: " + urlDelPanelAdmin.trim(),
+  );
 }
 
 /* ==========================================================================
@@ -474,9 +603,17 @@ function getUsersSheet_() {
 
   if (!sheet) {
     sheet = ss.insertSheet(USERS_SHEET_NAME);
-    const headers = ['Nombre', 'Email', 'PasswordHash', 'Salt', 'Rol', 'Activo', 'FechaCreacion'];
+    const headers = [
+      "Nombre",
+      "Email",
+      "PasswordHash",
+      "Salt",
+      "Rol",
+      "Activo",
+      "FechaCreacion",
+    ];
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
     sheet.setFrozenRows(1);
     sheet.hideSheet();
   }
@@ -489,17 +626,25 @@ function generarSalt_() {
 }
 
 function hashPassword_(password, salt) {
-  const raw = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(password) + String(salt), Utilities.Charset.UTF_8);
+  const raw = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    String(password) + String(salt),
+    Utilities.Charset.UTF_8,
+  );
   return Utilities.base64Encode(raw);
 }
 
 function findUserByEmail_(email) {
   const sheet = getUsersSheet_();
   const values = sheet.getDataRange().getValues();
-  const target = String(email || '').trim().toLowerCase();
+  const target = String(email || "")
+    .trim()
+    .toLowerCase();
 
   for (let i = 1; i < values.length; i++) {
-    const rowEmail = String(values[i][1] || '').trim().toLowerCase();
+    const rowEmail = String(values[i][1] || "")
+      .trim()
+      .toLowerCase();
     if (rowEmail && rowEmail === target) {
       return {
         rowIndex: i + 1,
@@ -508,7 +653,7 @@ function findUserByEmail_(email) {
         passwordHash: values[i][2],
         salt: values[i][3],
         rol: values[i][4],
-        activo: values[i][5] === true || values[i][5] === 'TRUE'
+        activo: values[i][5] === true || values[i][5] === "TRUE",
       };
     }
   }
@@ -522,9 +667,19 @@ function crearOActualizarUsuario_(nombre, email, passwordPlano, rol, activo) {
   const existente = findUserByEmail_(email);
 
   if (existente) {
-    sheet.getRange(existente.rowIndex, 1, 1, 6).setValues([[nombre, email, hash, salt, rol, activo]]);
+    sheet
+      .getRange(existente.rowIndex, 1, 1, 6)
+      .setValues([[nombre, email, hash, salt, rol, activo]]);
   } else {
-    sheet.appendRow([nombre, email, hash, salt, rol, activo, new Date().toISOString()]);
+    sheet.appendRow([
+      nombre,
+      email,
+      hash,
+      salt,
+      rol,
+      activo,
+      new Date().toISOString(),
+    ]);
   }
 }
 
@@ -536,18 +691,24 @@ function crearOActualizarUsuario_(nombre, email, passwordPlano, rol, activo) {
  */
 function crearPrimerAdmin() {
   const props = PropertiesService.getScriptProperties();
-  if (props.getProperty('SETUP_COMPLETE') === 'true') {
-    throw new Error('La configuración inicial ya se completó. Usa el panel para crear más usuarios.');
+  if (props.getProperty("SETUP_COMPLETE") === "true") {
+    throw new Error(
+      "La configuración inicial ya se completó. Usa el panel para crear más usuarios.",
+    );
   }
 
   // 🔧 EDITA ESTOS TRES VALORES ANTES DE EJECUTAR:
-  const nombre = 'Florería Natura';
-  const email = 'usuario@gmail.com';
-  const passwordPlano = 'usuario';
+  const nombre = "Florería Oaxaca";
+  const email = "usuario@gmail.com";
+  const passwordPlano = "usuario";
 
-  crearOActualizarUsuario_(nombre, email, passwordPlano, 'admin', true);
-  props.setProperty('SETUP_COMPLETE', 'true');
-  Logger.log('Usuario administrador creado: ' + email + ' — ¡cambia la contraseña por defecto desde el panel!');
+  crearOActualizarUsuario_(nombre, email, passwordPlano, "admin", true);
+  props.setProperty("SETUP_COMPLETE", "true");
+  Logger.log(
+    "Usuario administrador creado: " +
+      email +
+      " — ¡cambia la contraseña por defecto desde el panel!",
+  );
 }
 
 /**
@@ -555,21 +716,31 @@ function crearPrimerAdmin() {
  */
 function crearUsuarioAdmin(token, nombre, email, passwordPlano, rol) {
   const session = validateToken_(token);
-  if (session.rol !== 'admin') {
-    throw new Error('No tienes permisos para crear usuarios');
+  if (session.rol !== "admin") {
+    throw new Error("No tienes permisos para crear usuarios");
   }
   if (!nombre || !email || !passwordPlano) {
-    throw new Error('Nombre, correo y contraseña son obligatorios');
+    throw new Error("Nombre, correo y contraseña son obligatorios");
   }
-  const rolFinal = rol === 'admin' ? 'admin' : 'staff';
-  crearOActualizarUsuario_(nombre.trim(), email.trim(), passwordPlano, rolFinal, true);
+  const rolFinal = rol === "admin" ? "admin" : "staff";
+  crearOActualizarUsuario_(
+    nombre.trim(),
+    email.trim(),
+    passwordPlano,
+    rolFinal,
+    true,
+  );
   return { success: true };
 }
 
 function createSessionToken_(email, nombre, rol) {
   const token = Utilities.getUuid();
   const cache = CacheService.getScriptCache();
-  cache.put('session_' + token, JSON.stringify({ email, nombre, rol }), SESSION_DURATION_SECONDS);
+  cache.put(
+    "session_" + token,
+    JSON.stringify({ email, nombre, rol }),
+    SESSION_DURATION_SECONDS,
+  );
   return token;
 }
 
@@ -579,12 +750,12 @@ function createSessionToken_(email, nombre, rol) {
  */
 function validateToken_(token) {
   if (!token) {
-    throw new Error('Sesión no válida. Inicia sesión nuevamente.');
+    throw new Error("Sesión no válida. Inicia sesión nuevamente.");
   }
   const cache = CacheService.getScriptCache();
-  const payload = cache.get('session_' + token);
+  const payload = cache.get("session_" + token);
   if (!payload) {
-    throw new Error('Tu sesión expiró. Inicia sesión nuevamente.');
+    throw new Error("Tu sesión expiró. Inicia sesión nuevamente.");
   }
   return JSON.parse(payload);
 }
@@ -595,14 +766,19 @@ function validateToken_(token) {
 function loginWithPassword(email, password) {
   const user = findUserByEmail_(email);
   if (!user || !user.activo) {
-    throw new Error('Correo o contraseña incorrectos');
+    throw new Error("Correo o contraseña incorrectos");
   }
   const hash = hashPassword_(password, user.salt);
   if (hash !== user.passwordHash) {
-    throw new Error('Correo o contraseña incorrectos');
+    throw new Error("Correo o contraseña incorrectos");
   }
   const token = createSessionToken_(user.email, user.nombre, user.rol);
-  return { token: token, nombre: user.nombre, email: user.email, rol: user.rol };
+  return {
+    token: token,
+    nombre: user.nombre,
+    email: user.email,
+    rol: user.rol,
+  };
 }
 
 /**
@@ -619,7 +795,12 @@ function checkGoogleSession() {
     const user = findUserByEmail_(email);
     if (user && user.activo) {
       const token = createSessionToken_(user.email, user.nombre, user.rol);
-      return { authenticated: true, token: token, nombre: user.nombre, email: user.email };
+      return {
+        authenticated: true,
+        token: token,
+        nombre: user.nombre,
+        email: user.email,
+      };
     }
     return { authenticated: false };
   } catch (err) {
@@ -629,7 +810,7 @@ function checkGoogleSession() {
 
 function logout(token) {
   if (token) {
-    CacheService.getScriptCache().remove('session_' + token);
+    CacheService.getScriptCache().remove("session_" + token);
   }
   return true;
 }
@@ -657,35 +838,52 @@ function adminGetPedidos(token, filtros) {
     if (!rowVal[16]) continue; // sin UUID, fila vacía
 
     let productos = [];
-    try { productos = JSON.parse(rowVal[11] || '[]'); } catch (e) { productos = []; }
+    try {
+      productos = JSON.parse(rowVal[11] || "[]");
+    } catch (e) {
+      productos = [];
+    }
 
     const pedido = {
-      cliente: String(rowDisp[0] || ''),
-      telefono: String(rowDisp[1] || ''),
-      tipoEntrega: String(rowDisp[2] || ''),
-      direccion: String(rowDisp[3] || ''),
-      referencias: String(rowDisp[4] || ''),
-      destinatario: String(rowDisp[5] || ''),
-      telefonoDestinatario: String(rowDisp[6] || ''),
-      metodoPago: String(rowDisp[7] || ''),
+      cliente: String(rowDisp[0] || ""),
+      telefono: String(rowDisp[1] || ""),
+      tipoEntrega: String(rowDisp[2] || ""),
+      direccion: String(rowDisp[3] || ""),
+      referencias: String(rowDisp[4] || ""),
+      destinatario: String(rowDisp[5] || ""),
+      telefonoDestinatario: String(rowDisp[6] || ""),
+      metodoPago: String(rowDisp[7] || ""),
       fechaEntrega: normalizeDate(rowVal[8] || rowDisp[8]),
       horaEntrega: normalizeTime(rowVal[9] || rowDisp[9]),
-      dedicatoria: String(rowDisp[10] || ''),
+      dedicatoria: String(rowDisp[10] || ""),
       productos: productos,
       total: Number(rowVal[12]) || 0,
       puntos: Number(rowVal[13]) || 0,
-      estado: String(rowDisp[14] || 'Pendiente'),
+      estado: String(rowDisp[14] || "Pendiente"),
       timestamp: rowVal[15],
-      uuid: String(rowVal[16] || ''),
-      rowIndex: i + 1
+      uuid: String(rowVal[16] || ""),
+      rowIndex: i + 1,
     };
 
-    if (filtros.estado && filtros.estado !== 'all' && pedido.estado !== filtros.estado) continue;
-    if (filtros.fechaDesde && pedido.fechaEntrega < filtros.fechaDesde) continue;
-    if (filtros.fechaHasta && pedido.fechaEntrega > filtros.fechaHasta) continue;
+    if (
+      filtros.estado &&
+      filtros.estado !== "all" &&
+      pedido.estado !== filtros.estado
+    )
+      continue;
+    if (filtros.fechaDesde && pedido.fechaEntrega < filtros.fechaDesde)
+      continue;
+    if (filtros.fechaHasta && pedido.fechaEntrega > filtros.fechaHasta)
+      continue;
     if (filtros.busqueda) {
       const q = String(filtros.busqueda).toLowerCase();
-      const haystack = (pedido.cliente + ' ' + pedido.telefono + ' ' + pedido.destinatario).toLowerCase();
+      const haystack = (
+        pedido.cliente +
+        " " +
+        pedido.telefono +
+        " " +
+        pedido.destinatario
+      ).toLowerCase();
       if (!haystack.includes(q)) continue;
     }
 
@@ -716,10 +914,10 @@ function getPedidoRowByUuid_(uuid) {
 function adminActualizarEstadoPedido(token, uuid, nuevoEstado) {
   validateToken_(token);
   if (ESTADOS_VALIDOS.indexOf(nuevoEstado) === -1) {
-    throw new Error('Estado no válido');
+    throw new Error("Estado no válido");
   }
   const found = getPedidoRowByUuid_(uuid);
-  if (!found) throw new Error('No se encontró el pedido');
+  if (!found) throw new Error("No se encontró el pedido");
 
   getSheet().getRange(found.rowIndex, 15).setValue(nuevoEstado);
   return { success: true };
@@ -733,8 +931,8 @@ function adminCrearPedidoManual(token, data) {
   validateToken_(token);
   const response = handleCrearPedido(data);
   const parsed = JSON.parse(response.getContent());
-  if (parsed.status === 'error') {
-    throw new Error(parsed.data.error || 'No se pudo crear el pedido');
+  if (parsed.status === "error") {
+    throw new Error(parsed.data.error || "No se pudo crear el pedido");
   }
   return parsed.data;
 }
@@ -744,11 +942,11 @@ function adminCrearPedidoManual(token, data) {
  */
 function adminEliminarPedido(token, uuid) {
   const session = validateToken_(token);
-  if (session.rol !== 'admin') {
-    throw new Error('No tienes permisos para eliminar pedidos');
+  if (session.rol !== "admin") {
+    throw new Error("No tienes permisos para eliminar pedidos");
   }
   const found = getPedidoRowByUuid_(uuid);
-  if (!found) throw new Error('No se encontró el pedido');
+  if (!found) throw new Error("No se encontró el pedido");
   getSheet().deleteRow(found.rowIndex);
   return { success: true };
 }
@@ -763,12 +961,12 @@ function adminGetDashboard(token) {
   const values = sheet.getDataRange().getValues();
   const displayValues = sheet.getDataRange().getDisplayValues();
   const tz = Session.getScriptTimeZone();
-  const todayStr = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+  const todayStr = Utilities.formatDate(new Date(), tz, "yyyy-MM-dd");
 
-  const hoy = new Date(todayStr + 'T00:00:00');
+  const hoy = new Date(todayStr + "T00:00:00");
   const inicioSemana = new Date(hoy);
   inicioSemana.setDate(hoy.getDate() - hoy.getDay());
-  const inicioSemanaStr = Utilities.formatDate(inicioSemana, tz, 'yyyy-MM-dd');
+  const inicioSemanaStr = Utilities.formatDate(inicioSemana, tz, "yyyy-MM-dd");
 
   const porEstado = {};
   const porTipoEntrega = {};
@@ -787,10 +985,10 @@ function adminGetDashboard(token) {
     const montoTotal = Number(rowVal[12]) || 0;
     ventasTotales += montoTotal;
 
-    const estado = String(rowDisp[14] || 'Pendiente');
+    const estado = String(rowDisp[14] || "Pendiente");
     porEstado[estado] = (porEstado[estado] || 0) + 1;
 
-    const tipoEntrega = String(rowDisp[2] || '');
+    const tipoEntrega = String(rowDisp[2] || "");
     porTipoEntrega[tipoEntrega] = (porTipoEntrega[tipoEntrega] || 0) + 1;
 
     const fechaEntrega = normalizeDate(rowVal[8] || rowDisp[8]);
@@ -803,7 +1001,15 @@ function adminGetDashboard(token) {
     }
   }
 
-  return { total, ventasTotales, entregasHoy, pedidosSemana, ventasSemana, porEstado, porTipoEntrega };
+  return {
+    total,
+    ventasTotales,
+    entregasHoy,
+    pedidosSemana,
+    ventasSemana,
+    porEstado,
+    porTipoEntrega,
+  };
 }
 
 /* ==========================================================================
@@ -823,7 +1029,7 @@ function adminGetClientes(token) {
     const rowDisp = displayValues[i];
     if (!rowVal[16]) continue;
 
-    const telefono = String(rowDisp[1] || '').trim();
+    const telefono = String(rowDisp[1] || "").trim();
     if (!telefono) continue;
 
     const total = Number(rowVal[12]) || 0;
@@ -831,12 +1037,12 @@ function adminGetClientes(token) {
 
     if (!clientesMap[telefono]) {
       clientesMap[telefono] = {
-        nombre: String(rowDisp[0] || ''),
+        nombre: String(rowDisp[0] || ""),
         telefono: telefono,
         pedidos: 0,
         totalGastado: 0,
         puntosAcumulados: 0,
-        ultimoPedido: fechaPedido
+        ultimoPedido: fechaPedido,
       };
     }
 
@@ -847,7 +1053,9 @@ function adminGetClientes(token) {
     if (fechaPedido > c.ultimoPedido) c.ultimoPedido = fechaPedido;
   }
 
-  return Object.values(clientesMap).sort((a, b) => b.totalGastado - a.totalGastado);
+  return Object.values(clientesMap).sort(
+    (a, b) => b.totalGastado - a.totalGastado,
+  );
 }
 
 /* ==========================================================================
@@ -862,44 +1070,63 @@ function adminExportPedidoPDF(token, uuid) {
   validateToken_(token);
 
   const found = getPedidoRowByUuid_(uuid);
-  if (!found) throw new Error('No se encontró el pedido');
+  if (!found) throw new Error("No se encontró el pedido");
 
-  const displayRow = getSheet().getRange(found.rowIndex, 1, 1, 17).getDisplayValues()[0];
+  const displayRow = getSheet()
+    .getRange(found.rowIndex, 1, 1, 17)
+    .getDisplayValues()[0];
   let productos = [];
-  try { productos = JSON.parse(getSheet().getRange(found.rowIndex, 12).getValue() || '[]'); } catch (e) { productos = []; }
+  try {
+    productos = JSON.parse(
+      getSheet().getRange(found.rowIndex, 12).getValue() || "[]",
+    );
+  } catch (e) {
+    productos = [];
+  }
 
   const pedido = {
-    cliente: displayRow[0] || 'Sin nombre',
-    telefono: displayRow[1] || '',
-    tipoEntrega: displayRow[2] === 'tienda' ? 'Recoger en tienda' : 'Envío a domicilio',
-    direccion: displayRow[3] || '—',
-    destinatario: displayRow[5] || '—',
-    metodoPago: displayRow[7] || '',
+    cliente: displayRow[0] || "Sin nombre",
+    telefono: displayRow[1] || "",
+    tipoEntrega:
+      displayRow[2] === "tienda" ? "Recoger en tienda" : "Envío a domicilio",
+    direccion: displayRow[3] || "—",
+    destinatario: displayRow[5] || "—",
+    metodoPago: displayRow[7] || "",
     fecha: normalizeDate(displayRow[8]),
     hora: normalizeTime(displayRow[9]),
-    dedicatoria: displayRow[10] || '—',
-    total: displayRow[12] || '0',
-    estado: displayRow[14] || 'Pendiente'
+    dedicatoria: displayRow[10] || "—",
+    total: displayRow[12] || "0",
+    estado: displayRow[14] || "Pendiente",
   };
 
-  const doc = DocumentApp.create('Comprobante de Pedido - ' + pedido.cliente + ' - ' + pedido.fecha);
+  const doc = DocumentApp.create(
+    "Comprobante de Pedido - " + pedido.cliente + " - " + pedido.fecha,
+  );
   const body = doc.getBody();
-  body.setMarginTop(50).setMarginBottom(50).setMarginLeft(50).setMarginRight(50);
+  body
+    .setMarginTop(50)
+    .setMarginBottom(50)
+    .setMarginLeft(50)
+    .setMarginRight(50);
 
-  body.appendParagraph(BRAND_NAME).setHeading(DocumentApp.ParagraphHeading.TITLE);
-  body.appendParagraph('Comprobante de Pedido').setHeading(DocumentApp.ParagraphHeading.HEADING2);
+  body
+    .appendParagraph(BRAND_NAME)
+    .setHeading(DocumentApp.ParagraphHeading.TITLE);
+  body
+    .appendParagraph("Comprobante de Pedido")
+    .setHeading(DocumentApp.ParagraphHeading.HEADING2);
   body.appendHorizontalRule();
 
   const filas = [
-    ['Cliente', pedido.cliente],
-    ['Teléfono', pedido.telefono],
-    ['Modalidad', pedido.tipoEntrega],
-    ['Destinatario', pedido.destinatario],
-    ['Dirección', pedido.direccion],
-    ['Método de Pago', pedido.metodoPago],
-    ['Fecha de Entrega', pedido.fecha],
-    ['Hora de Entrega', pedido.hora],
-    ['Estatus', pedido.estado]
+    ["Cliente", pedido.cliente],
+    ["Teléfono", pedido.telefono],
+    ["Modalidad", pedido.tipoEntrega],
+    ["Destinatario", pedido.destinatario],
+    ["Dirección", pedido.direccion],
+    ["Método de Pago", pedido.metodoPago],
+    ["Fecha de Entrega", pedido.fecha],
+    ["Hora de Entrega", pedido.hora],
+    ["Estatus", pedido.estado],
   ];
 
   const table = body.appendTable(filas);
@@ -909,20 +1136,34 @@ function adminExportPedidoPDF(token, uuid) {
     labelCell.setWidth(140);
   }
 
-  body.appendParagraph(' ');
-  body.appendParagraph('Productos').setHeading(DocumentApp.ParagraphHeading.HEADING3);
-  const filasProductos = productos.map(p => [p.name, String(p.quantity), '$' + (p.price * p.quantity) + ' MXN']);
-  filasProductos.unshift(['Producto', 'Cantidad', 'Subtotal']);
+  body.appendParagraph(" ");
+  body
+    .appendParagraph("Productos")
+    .setHeading(DocumentApp.ParagraphHeading.HEADING3);
+  const filasProductos = productos.map((p) => [
+    p.name,
+    String(p.quantity),
+    "$" + p.price * p.quantity + " MXN",
+  ]);
+  filasProductos.unshift(["Producto", "Cantidad", "Subtotal"]);
   const tablaProductos = body.appendTable(filasProductos);
   tablaProductos.getRow(0).editAsText().setBold(true);
 
-  body.appendParagraph(' ');
-  body.appendParagraph('Total: $' + pedido.total + ' MXN').setBold(true);
-  body.appendParagraph('Dedicatoria: ' + pedido.dedicatoria);
+  body.appendParagraph(" ");
+  body.appendParagraph("Total: $" + pedido.total + " MXN").setBold(true);
+  body.appendParagraph("Dedicatoria: " + pedido.dedicatoria);
 
-  body.appendParagraph(' ');
+  body.appendParagraph(" ");
   body.appendParagraph(BRAND_PHONE).setFontSize(9);
-  body.appendParagraph('Generado el ' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm'))
+  body
+    .appendParagraph(
+      "Generado el " +
+        Utilities.formatDate(
+          new Date(),
+          Session.getScriptTimeZone(),
+          "dd/MM/yyyy HH:mm",
+        ),
+    )
     .setItalic(true)
     .setFontSize(9);
 
@@ -934,12 +1175,17 @@ function adminExportPedidoPDF(token, uuid) {
   // El documento temporal ya no se necesita: solo sirvió para generar el PDF
   DriveApp.getFileById(doc.getId()).setTrashed(true);
 
-  const nombreArchivo = 'Pedido_' + pedido.cliente.replace(/[^a-zA-Z0-9]+/g, '_') + '_' + pedido.fecha + '.pdf';
+  const nombreArchivo =
+    "Pedido_" +
+    pedido.cliente.replace(/[^a-zA-Z0-9]+/g, "_") +
+    "_" +
+    pedido.fecha +
+    ".pdf";
 
   return {
     base64: base64,
     filename: nombreArchivo,
-    mimeType: 'application/pdf'
+    mimeType: "application/pdf",
   };
 }
 
@@ -958,7 +1204,9 @@ function limpiarRespaldosAntiguos_(folder) {
   const it = folder.getFilesByType(MimeType.MICROSOFT_EXCEL);
   while (it.hasNext()) archivos.push(it.next());
 
-  archivos.sort((a, b) => b.getDateCreated().getTime() - a.getDateCreated().getTime());
+  archivos.sort(
+    (a, b) => b.getDateCreated().getTime() - a.getDateCreated().getTime(),
+  );
 
   for (let i = MAX_BACKUPS_TO_KEEP; i < archivos.length; i++) {
     archivos[i].setTrashed(true);
@@ -975,21 +1223,35 @@ function backupPedidosSemanal() {
 
   // Se crea una hoja de cálculo temporal con una copia de SOLO la hoja de Pedidos,
   // para que el respaldo nunca incluya la hoja oculta de Usuarios (contraseñas).
-  const tempSS = SpreadsheetApp.create('Respaldo temporal - Pedidos - ' + new Date().toISOString());
+  const tempSS = SpreadsheetApp.create(
+    "Respaldo temporal - Pedidos - " + new Date().toISOString(),
+  );
   const copiaPedidos = sourceSheet.copyTo(tempSS);
-  copiaPedidos.setName('Pedidos');
+  copiaPedidos.setName("Pedidos");
 
-  const hojaPorDefecto = tempSS.getSheets().find(s => s.getSheetId() !== copiaPedidos.getSheetId());
+  const hojaPorDefecto = tempSS
+    .getSheets()
+    .find((s) => s.getSheetId() !== copiaPedidos.getSheetId());
   if (hojaPorDefecto) tempSS.deleteSheet(hojaPorDefecto);
 
   SpreadsheetApp.flush();
 
-  const url = 'https://docs.google.com/spreadsheets/d/' + tempSS.getId() + '/export?format=xlsx';
+  const url =
+    "https://docs.google.com/spreadsheets/d/" +
+    tempSS.getId() +
+    "/export?format=xlsx";
   const response = UrlFetchApp.fetch(url, {
-    headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() }
+    headers: { Authorization: "Bearer " + ScriptApp.getOAuthToken() },
   });
 
-  const nombreArchivo = 'Pedidos_Respaldo_' + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd') + '.xlsx';
+  const nombreArchivo =
+    "Pedidos_Respaldo_" +
+    Utilities.formatDate(
+      new Date(),
+      Session.getScriptTimeZone(),
+      "yyyy-MM-dd",
+    ) +
+    ".xlsx";
   const blob = response.getBlob().setName(nombreArchivo);
 
   const folder = getOrCreateBackupFolder_();
@@ -999,8 +1261,8 @@ function backupPedidosSemanal() {
   DriveApp.getFileById(tempSS.getId()).setTrashed(true);
 
   const props = PropertiesService.getScriptProperties();
-  props.setProperty('LAST_BACKUP_DATE', new Date().toISOString());
-  props.setProperty('LAST_BACKUP_URL', file.getUrl());
+  props.setProperty("LAST_BACKUP_DATE", new Date().toISOString());
+  props.setProperty("LAST_BACKUP_URL", file.getUrl());
 
   limpiarRespaldosAntiguos_(folder);
 
@@ -1011,7 +1273,8 @@ function backupPedidosSemanal() {
     fileName: file.getName(),
     url: file.getUrl(),
     base64: base64,
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    mimeType:
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   };
 }
 
@@ -1021,16 +1284,19 @@ function backupPedidosSemanal() {
  */
 function instalarTriggerRespaldoSemanal() {
   ScriptApp.getProjectTriggers().forEach((t) => {
-    if (t.getHandlerFunction() === 'backupPedidosSemanal') ScriptApp.deleteTrigger(t);
+    if (t.getHandlerFunction() === "backupPedidosSemanal")
+      ScriptApp.deleteTrigger(t);
   });
 
-  ScriptApp.newTrigger('backupPedidosSemanal')
+  ScriptApp.newTrigger("backupPedidosSemanal")
     .timeBased()
     .onWeekDay(ScriptApp.WeekDay.MONDAY)
     .atHour(2)
     .create();
 
-  Logger.log('✅ Respaldo automático instalado: cada lunes alrededor de las 2:00 AM.');
+  Logger.log(
+    "✅ Respaldo automático instalado: cada lunes alrededor de las 2:00 AM.",
+  );
 }
 
 /**
@@ -1040,8 +1306,8 @@ function adminGetBackupInfo(token) {
   validateToken_(token);
   const props = PropertiesService.getScriptProperties();
   return {
-    lastBackupDate: props.getProperty('LAST_BACKUP_DATE') || null,
-    lastBackupUrl: props.getProperty('LAST_BACKUP_URL') || null
+    lastBackupDate: props.getProperty("LAST_BACKUP_DATE") || null,
+    lastBackupUrl: props.getProperty("LAST_BACKUP_URL") || null,
   };
 }
 
@@ -1054,7 +1320,74 @@ function adminForzarRespaldo(token) {
 }
 
 function resetearSetup() {
-  PropertiesService.getScriptProperties().deleteProperty('SETUP_COMPLETE');
-  Logger.log('✅ Permiso de configuración restablecido correctamente.');
+  PropertiesService.getScriptProperties().deleteProperty("SETUP_COMPLETE");
+  Logger.log("✅ Permiso de configuración restablecido correctamente.");
 }
 
+/**
+ * Registra una nueva visita en la pestaña 'Visitas'
+ */
+function registrarVisitaEnSheet(datosVisita) {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    let sheetVisitas = ss.getSheetByName("Visitas");
+
+    // Si la pestaña no existe, la crea con sus encabezados
+    if (!sheetVisitas) {
+      sheetVisitas = ss.insertSheet("Visitas");
+      sheetVisitas.appendRow([
+        "Fecha y Hora",
+        "Página / URL",
+        "Dispositivo",
+        "Origen (Referrer)",
+        "Navegador / User Agent",
+      ]);
+    }
+
+    const fechaRegistro = new Date().toLocaleString("es-MX", {
+      timeZone: "America/Mexico_City",
+    });
+
+    sheetVisitas.appendRow([
+      fechaRegistro,
+      datosVisita.url || "Página Principal",
+      datosVisita.esMovil || "Desconocido",
+      datosVisita.referrer || "Directo",
+      datosVisita.userAgent || "",
+    ]);
+
+    return { exito: true };
+  } catch (error) {
+    Logger.log("Error al registrar visita: " + error.toString());
+    return { exito: false, error: error.toString() };
+  }
+}
+
+/**
+ * Manejador principal de peticiones POST
+ */
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+
+    // Registro de Visitas al cargar la web
+    if (data.action === "registrarVisita") {
+      registrarVisitaEnSheet(data.visita);
+      return ContentService.createTextOutput(
+        JSON.stringify({ exito: true }),
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Registro de Pedidos
+    if (data.action === "crearPedido") {
+      const resultado = registrarPedidoEnSheet(data.pedido);
+      return ContentService.createTextOutput(
+        JSON.stringify(resultado),
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch (err) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ exito: false, error: err.toString() }),
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+}

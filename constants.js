@@ -1,22 +1,21 @@
 const CONFIG = {
-  // URL de Google Apps Script (REEMPLAZAR con la URL de TU implementación pública,
-  // igual que se hizo en el proyecto de C&H Consultorio Dental)
-  API_URL: 'https://script.google.com/macros/s/AKfycbxLx45ZkKgcMKMQlvHkL07sSZ6ROfEmgHnNCAIKzOpojy1Towhte6mzxLF6VOlCTajO9Q/exec',
+  // URL de Google Apps Script de tu implementación pública
+  API_URL: 'https://script.google.com/macros/s/AKfycbxH7s-hirs5Y2jMcfveYFJK692NIVgPD1S2Yupx5qEiKrfNk2ecyr_pVg6D0uqGGCE2/exec',
 
   business: {
-    name: "Florería Natura",
-    phone: "529511284003", // Número real de WhatsApp
-    address: "Almendros 600, esq. Manuel Ruiz (Edificio Núñez Banuet), Col. Reforma, 68050 Oaxaca de Juárez, Oax.",
-    schedule: "Lunes a Sábado: 8:00 AM - 10:30 PM | Domingo: 9:00 AM - 5:00 PM",
+    name: "Florería & Detalles",
+    phone: "529514990142", // Tu número general
+    address: "Centro Histórico, 68000 Oaxaca de Juárez, Oax.",
+    schedule: "Lunes a Sábado: 8:00 AM - 8:00 PM | Domingo: 9:00 AM - 4:00 PM",
     socials: {
-      facebook: "https://facebook.com/florerianatura",
-      instagram: "https://instagram.com/florerianatura",
-      twitter: "https://x.com/florerianatura"
+      facebook: "https://facebook.com",
+      instagram: "https://instagram.com",
+      twitter: "https://x.com"
     }
   },
 
   topAlert: {
-    text: "🌸 ¡Puntos Natura! Acumula 1 punto por cada $100 MXN de compra y úsalos como dinero real."
+    text: "🌸 ¡Bienvenido! Acumula puntos por cada $100 MXN de compra y úsalos como dinero real."
   },
 
   navbar: {
@@ -64,7 +63,7 @@ const CONFIG = {
 
   customBouquet: {
     title: "¿Buscas un diseño a tu medida?",
-    subtitle: "En Florería Natura creamos arreglos con intención. Si tienes una idea o presupuesto específico, lo hacemos realidad para ti.",
+    subtitle: "Creamos arreglos con intención. Si tienes una idea o presupuesto específico, lo hacemos realidad para ti.",
     options: [
       "Elige tus flores preferidas (Rosas, Girasoles, Tulipanes, Gerberas, Gladiolas)",
       "Selecciona la paleta de colores para la ocasión",
@@ -77,7 +76,7 @@ const CONFIG = {
   faqs: [
     {
       question: "¿Cuáles son las zonas de envío gratis?",
-      answer: "El envío es gratuito en compras seleccionadas y según la zona dentro de Oaxaca de Juárez y municipios conurbados."
+      answer: "El envío es gratuito en compras seleccionadas dentro de la zona del Centro de Oaxaca y municipios cercanos."
     },
     {
       question: "¿Puedo pedir entregas para el mismo día?",
@@ -88,8 +87,8 @@ const CONFIG = {
       answer: "Aceptamos pago en efectivo (al recoger o contra entrega según zona) y transferencia bancaria directa."
     },
     {
-      question: "¿Cómo funciona el Programa Puntos Natura?",
-      answer: "Por cada $100 MXN de compra acumulas 1 Punto Natura. Cada punto equivale a $1 MXN de descuento directo en tus siguientes pedidos."
+      question: "¿Cómo funciona el Programa de Puntos?",
+      answer: "Por cada $100 MXN de compra acumulas 1 Punto. Cada punto equivale a $1 MXN de descuento directo en tus siguientes pedidos."
     }
   ]
 };

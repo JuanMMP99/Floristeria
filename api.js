@@ -1,5 +1,5 @@
 /**
- * API Client para Google Apps Script - Florería Natura
+ * API Client para Google Apps Script - Florería florería
  */
 const API = {
     async fetch(endpoint, params = {}) {
