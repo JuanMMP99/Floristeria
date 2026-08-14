@@ -203,82 +203,6 @@ function doGet(e) {
 }
 
 /**
- * Maneja las solicitudes POST
- */
-function doPost(e) {
-  try {
-    const contents = JSON.parse(e.postData.contents);
-    const action = contents.action;
-    const data = contents.data || contents.visita;
-
-    if (action === "crearPedido") {
-      return responseJSON(guardarPedidoEnHoja(data));
-    } else if (action === "registrarVisita") {
-      return responseJSON(guardarVisitaEnHoja(data));
-    }
-
-    return responseJSON({ status: "error", message: "Acción no válida" });
-  } catch (err) {
-    return responseJSON({ status: "error", message: err.toString() });
-  }
-}
-
-function doGet(e) {
-  return HtmlService.createTemplateFromFile("admin")
-    .evaluate()
-    .setTitle("Panel Administrativo - Florería")
-    .addMetaTag("viewport", "width=device-width, initial-scale=1.0");
-}
-
-function guardarPedidoEnHoja(data) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Pedidos");
-  const uuid =
-    "PED-" + Utilities.formatDate(new Date(), "GMT-6", "yyyyMMdd-HHmmss");
-
-  sheet.appendRow([
-    uuid,
-    new Date(),
-    data.cliente,
-    data.telefono,
-    data.tipoEntrega,
-    data.destinatario,
-    data.telefonoDestinatario,
-    data.direccion,
-    data.referencias,
-    data.metodoPago,
-    data.fechaEntrega,
-    data.horaEntrega,
-    data.dedicatoria,
-    JSON.stringify(data.productos),
-    data.total,
-    data.puntos,
-    "Pendiente",
-  ]);
-
-  return { status: "success", data: { uuid: uuid } };
-}
-
-function guardarVisitaEnHoja(data) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Visitas");
-  if (sheet) {
-    sheet.appendRow([
-      new Date(),
-      data.url,
-      data.referrer,
-      data.userAgent,
-      data.esMovil,
-    ]);
-  }
-  return { status: "success", data: "Visita registrada" };
-}
-
-function responseJSON(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(
-    ContentService.MimeType.JSON,
-  );
-}
-
-/**
  * Crea un nuevo pedido y envía notificación por correo electrónico
  */
 function handleCrearPedido(data) {
@@ -578,7 +502,7 @@ function configurarUrlAdmin() {
   // 🔧 EDITA ESTE VALOR ANTES DE EJECUTAR: pega aquí la URL de tu implementación
   // dedicada al panel (la segunda que crees, distinta de la de la API pública).
   const urlDelPanelAdmin =
-    "https://script.google.com/macros/s/AKfycbyfBlfl2xd7qr2YSy-au8EQe6y8clfqoYijfzh1PTBCPOtyWq0JG5vN8daUbWXpz0bHbg/exec";
+    "https://script.google.com/macros/s/AKfycbycQWpXcPFtenv2bhhLCiEG1OIK8c-tfAWkbl8PVPtlFd2s4OJVNzkFDxnRtfJUbG-E/exec";
 
   PropertiesService.getScriptProperties().setProperty(
     "ADMIN_DEPLOYMENT_URL",
@@ -1325,69 +1249,65 @@ function resetearSetup() {
 }
 
 /**
- * Registra una nueva visita en la pestaña 'Visitas'
+ * Obtiene o crea la hoja de Visitas
  */
-function registrarVisitaEnSheet(datosVisita) {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    let sheetVisitas = ss.getSheetByName("Visitas");
+function getVisitasSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName("Visitas");
 
-    // Si la pestaña no existe, la crea con sus encabezados
-    if (!sheetVisitas) {
-      sheetVisitas = ss.insertSheet("Visitas");
-      sheetVisitas.appendRow([
-        "Fecha y Hora",
-        "Página / URL",
-        "Dispositivo",
-        "Origen (Referrer)",
-        "Navegador / User Agent",
-      ]);
-    }
-
-    const fechaRegistro = new Date().toLocaleString("es-MX", {
-      timeZone: "America/Mexico_City",
-    });
-
-    sheetVisitas.appendRow([
-      fechaRegistro,
-      datosVisita.url || "Página Principal",
-      datosVisita.esMovil || "Desconocido",
-      datosVisita.referrer || "Directo",
-      datosVisita.userAgent || "",
-    ]);
-
-    return { exito: true };
-  } catch (error) {
-    Logger.log("Error al registrar visita: " + error.toString());
-    return { exito: false, error: error.toString() };
+  if (!sheet) {
+    sheet = ss.insertSheet("Visitas");
+    const headers = [
+      "Fecha y Hora",
+      "Pagina / URL",
+      "Origen (Referrer)",
+      "Dispositivo",
+      "Navegador / User Agent",
+    ];
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
+    sheet.setFrozenRows(1);
   }
+
+  return sheet;
 }
 
 /**
- * Manejador principal de peticiones POST
+ * Registra una visita al sitio en la hoja "Visitas"
+ */
+function handleRegistrarVisita(data) {
+  data = data || {};
+  const sheet = getVisitasSheet_();
+  sheet.appendRow([
+    new Date(),
+    sanitizeForSheet(data.url, 500),
+    sanitizeForSheet(data.referrer, 500),
+    sanitizeForSheet(data.esMovil, 20),
+    sanitizeForSheet(data.userAgent, 500),
+  ]);
+  return buildResponse({ message: "Visita registrada" }, true);
+}
+
+/**
+ * Manejador unico de peticiones POST (pedidos y registro de visitas).
+ * El cliente siempre envia: { action: "...", data: {...} }
  */
 function doPost(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
+    const contents = JSON.parse(e.postData.contents);
+    const action = contents.action;
+    const data = contents.data || contents.visita || contents.pedido || {};
 
-    // Registro de Visitas al cargar la web
-    if (data.action === "registrarVisita") {
-      registrarVisitaEnSheet(data.visita);
-      return ContentService.createTextOutput(
-        JSON.stringify({ exito: true }),
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // Registro de Pedidos
-    if (data.action === "crearPedido") {
-      const resultado = registrarPedidoEnSheet(data.pedido);
-      return ContentService.createTextOutput(
-        JSON.stringify(resultado),
-      ).setMimeType(ContentService.MimeType.JSON);
+    switch (action) {
+      case "crearPedido":
+        return handleCrearPedido(data);
+      case "registrarVisita":
+        return handleRegistrarVisita(data);
+      default:
+        return buildResponse({ error: "Accion no valida: " + action }, false);
     }
   } catch (err) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ exito: false, error: err.toString() }),
-    ).setMimeType(ContentService.MimeType.JSON);
+    console.error("Error en doPost:", err);
+    return buildResponse({ error: err.toString() }, false);
   }
 }

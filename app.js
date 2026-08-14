@@ -16,7 +16,22 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFormHandler();
   setMinDeliveryDate();
   enhancePhoneInputNotice();
+  registrarVisita();
 });
+
+// Registra la visita a la página actual (no bloquea ni interrumpe la carga si falla)
+function registrarVisita() {
+  const datosVisita = {
+    url: window.location.href,
+    referrer: document.referrer || "Directo",
+    userAgent: navigator.userAgent,
+    esMovil: /Mobi|Android/i.test(navigator.userAgent) ? "Móvil" : "Escritorio",
+  };
+
+  API.registrarVisita(datosVisita).catch((err) => {
+    console.log("No se pudo registrar la visita:", err.message);
+  });
+}
 
 // Agrega aviso sobre el número real de WhatsApp debajo del campo de teléfono del comprador
 function enhancePhoneInputNotice() {

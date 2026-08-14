@@ -1,6 +1,6 @@
 const CONFIG = {
   // URL de Google Apps Script de tu implementación pública
-  API_URL: 'https://script.google.com/macros/s/AKfycbxH7s-hirs5Y2jMcfveYFJK692NIVgPD1S2Yupx5qEiKrfNk2ecyr_pVg6D0uqGGCE2/exec',
+  API_URL: 'https://script.google.com/macros/s/AKfycby_3JHAtT-j3dwuzCZyq-bNtwUinx7-l-4jTsBXtnamGCKz86YXKctEgz5SKIl7Hql5/exec',
 
   business: {
     name: "Florería & Detalles",

@@ -63,5 +63,10 @@ const API = {
     // Método específico para crear un pedido
     async crearPedido(pedidoData) {
         return this.post('crearPedido', pedidoData);
+    },
+
+    // Método específico para registrar una visita (fire-and-forget, no bloquea la carga)
+    async registrarVisita(visitaData) {
+        return this.post('registrarVisita', visitaData);
     }
 };
