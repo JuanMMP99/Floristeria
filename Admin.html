@@ -578,6 +578,14 @@
       return '$' + (Number(n) || 0).toLocaleString('es-MX') + ' MXN';
     }
 
+    // Normaliza un teléfono mexicano a formato E.164 (52XXXXXXXXXX) y arma el link de WhatsApp
+    function whatsappLink(telefono) {
+      let digits = String(telefono || '').replace(/\D/g, '');
+      if (digits.length === 10) digits = '52' + digits;          // 10 dígitos -> agrega lada país
+      else if (digits.length === 12 && digits.startsWith('521')) digits = '52' + digits.slice(3); // corrige formato viejo 521
+      return 'https://wa.me/' + digits;
+    }
+
     function gasCall(fnName, ...args) {
       return new Promise((resolve, reject) => {
         google.script.run
@@ -667,6 +675,17 @@
 
       loadDashboard();
       loadPedidos();
+
+      // Si el panel se abrió con un enlace tipo #pedidos (p. ej. desde el correo
+      // de notificación de nuevo pedido), abre esa pestaña directamente.
+      const tabsValidos = ['dashboard', 'pedidos', 'agendar', 'clientes'];
+      const tabInicial = (window.location.hash || '').replace('#', '');
+      if (tabsValidos.includes(tabInicial)) switchTab(tabInicial);
+
+      window.addEventListener('hashchange', () => {
+        const tab = (window.location.hash || '').replace('#', '');
+        if (tabsValidos.includes(tab)) switchTab(tab);
+      });
     }
 
     function switchTab(tab) {
@@ -674,6 +693,7 @@
       document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('active', p.getAttribute('data-panel') === tab));
       document.getElementById('sidebar').classList.remove('open');
       document.getElementById('sidebarOverlay').classList.remove('show');
+      if (window.location.hash !== '#' + tab) window.location.hash = tab;
 
       if (tab === 'dashboard') loadDashboard();
       if (tab === 'pedidos') loadPedidos();
@@ -796,7 +816,9 @@
         <tr>
           <td>
             <strong>${p.cliente}</strong><br>
-            <span class="text-muted small">${p.telefono}</span>
+            <a href="${whatsappLink(p.telefono)}" target="_blank" rel="noopener" class="text-muted small" style="text-decoration:none;" title="Abrir chat de WhatsApp" onclick="event.stopPropagation()">
+              <i class="bi bi-whatsapp" style="color:#25D366;"></i> ${p.telefono}
+            </a>
           </td>
           <td>${p.fechaEntrega}<br><span class="text-muted small">${p.horaEntrega} hrs</span></td>
           <td>${p.tipoEntrega === 'tienda' ? 'Recoger' : 'Envío'}</td>
@@ -827,7 +849,7 @@
       selectedUuid = uuid;
 
       document.getElementById('detailCliente').innerText = p.cliente;
-      document.getElementById('detailUuid').innerText = p.telefono;
+      document.getElementById('detailUuid').innerHTML = `<a href="${whatsappLink(p.telefono)}" target="_blank" rel="noopener" style="text-decoration:none;"><i class="bi bi-whatsapp" style="color:#25D366;"></i> ${p.telefono}</a>`;
       document.getElementById('detailEstadoSelect').value = p.estado;
 
       const productosHtml = p.productos.map((prod) => `
@@ -840,7 +862,7 @@
         <div class="detail-row"><span>Puntos generados</span><span>+${p.puntos}</span></div>
         <div class="detail-row"><span>Modalidad</span><span>${p.tipoEntrega === 'tienda' ? 'Recoger en tienda' : 'Envío a domicilio'}</span></div>
         ${p.tipoEntrega === 'envio' ? `
-          <div class="detail-row"><span>Destinatario</span><span>${p.destinatario} (${p.telefonoDestinatario})</span></div>
+          <div class="detail-row"><span>Destinatario</span><span>${p.destinatario} (<a href="${whatsappLink(p.telefonoDestinatario)}" target="_blank" rel="noopener" style="text-decoration:none;"><i class="bi bi-whatsapp" style="color:#25D366;"></i> ${p.telefonoDestinatario}</a>)</span></div>
           <div class="detail-row"><span>Dirección</span><span>${p.direccion}</span></div>
         ` : ''}
         <div class="detail-row"><span>Método de pago</span><span>${p.metodoPago}</span></div>

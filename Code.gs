@@ -348,6 +348,13 @@ function handleCrearPedido(data) {
     const emailDestino = "juanposicionsatelital@gmail.com"; // 👈 Reemplaza por tu dirección de correo
     const asunto = `🌸 Nuevo Pedido: ${cliente} - ${fechaNorm}`;
 
+    // Enlace directo a la pestaña "Pedidos" del panel admin, usando la URL de
+    // implementación guardada en Script Properties (ADMIN_DEPLOYMENT_URL).
+    const adminUrl = PropertiesService.getScriptProperties().getProperty(
+      "ADMIN_DEPLOYMENT_URL",
+    );
+    const linkPedidos = adminUrl ? `${adminUrl}#pedidos` : null;
+
     const listaProductos = productosArr
       .map((p) => `${p.quantity}x ${p.name} ($${p.price * p.quantity} MXN)`)
       .join("<br>");
@@ -375,6 +382,15 @@ function handleCrearPedido(data) {
                     <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Dedicatoria:</td><td style="padding: 8px;">${dedicatoria || "—"}</td></tr>
                     <tr><td style="padding: 8px; font-weight: bold; background-color: #f8f9fa;">Estatus:</td><td style="padding: 8px;"><span style="background-color: #ffeaa7; padding: 3px 8px; border-radius: 4px; font-weight: bold;">${estado}</span></td></tr>
                 </table>
+                ${
+                  linkPedidos
+                    ? `
+                <div style="margin-top: 20px; text-align: center;">
+                    <a href="${linkPedidos}" style="background-color: #c23b68; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Ver pedido en el panel</a>
+                </div>
+                `
+                    : ""
+                }
             </div>
         `;
 
